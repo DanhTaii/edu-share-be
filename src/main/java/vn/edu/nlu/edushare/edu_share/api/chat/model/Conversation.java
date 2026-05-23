@@ -2,6 +2,8 @@ package vn.edu.nlu.edushare.edu_share.api.chat.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import vn.edu.nlu.edushare.edu_share.api.user.model.User;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,13 +15,15 @@ public class Conversation {
     private Integer id;
 
     @Column(name = "post_id")
-    private Integer postId; // Gắn với ID bài đăng món đồ
+    private Integer postId;
 
-    @Column(name = "user_one_id", length = 50)
-    private String userOneId; // Firebase UID người mua
+    @ManyToOne
+    @JoinColumn(name = "user_one_id", referencedColumnName = "id")
+    private User userOne;
 
-    @Column(name = "user_two_id", length = 50)
-    private String userTwoId; // Firebase UID chủ món đồ
+    @ManyToOne
+    @JoinColumn(name = "user_two_id", referencedColumnName = "id")
+    private User userTwo;
 
     private String lastMessage;
 
