@@ -8,6 +8,7 @@ import vn.edu.nlu.edushare.edu_share.api.chat.dto.ChatMessageDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.model.Conversation;
 import vn.edu.nlu.edushare.edu_share.api.chat.model.Message;
 import vn.edu.nlu.edushare.edu_share.api.chat.repository.ConversationRepository;
+import vn.edu.nlu.edushare.edu_share.api.chat.repository.MessageRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,6 +18,8 @@ import java.util.List;
 public class ChatService {
 
     private final ConversationRepository conversationRepository;
+    private final MessageRepository messageRepository;
+
     @Transactional
 //    public Message processAndSaveMessage(ChatMessageDto chatMessageDto) {
 //        Conversation conversation = conversationRepository.findByPostIdAndUserOneIdAndUserTwoId(
@@ -45,5 +48,9 @@ public class ChatService {
 //    }
     public List<ChatListResponseDto> getUserConversations(String userId) {
         return conversationRepository.findUserConversations(userId);
+    }
+
+    public List<ChatMessageDto> getUserMessages(Integer conversationId) {
+        return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
     }
 }
