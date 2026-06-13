@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.ChatListResponseDto;
+import vn.edu.nlu.edushare.edu_share.api.chat.dto.ChatMessageDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.service.ChatService;
 
 import java.util.List;
@@ -22,5 +23,11 @@ public class MessageRestController {
     public ResponseEntity<List<ChatListResponseDto>> getUserConversations(@RequestParam String userId) {
         List<ChatListResponseDto> conversations = chatService.getUserConversations(userId);
         return ResponseEntity.ok(conversations);
+    }
+
+    @GetMapping("/messages")
+    public ResponseEntity<List<ChatMessageDto>> getUserMessages(@RequestParam Integer conversationId) {
+        List<ChatMessageDto> messages = chatService.getUserMessages(conversationId);
+        return ResponseEntity.ok(messages);
     }
 }

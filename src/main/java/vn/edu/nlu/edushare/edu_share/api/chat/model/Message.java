@@ -3,6 +3,7 @@ package vn.edu.nlu.edushare.edu_share.api.chat.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 
@@ -22,5 +23,5 @@ public class Message {
     private String senderId; // Ai là người gửi?
     private String content;  // Nội dung tin nhắn
     private Boolean isRead = false; // Trạng thái đã đọc
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private Timestamp createdAt = Timestamp.valueOf(LocalDateTime.now());
 }
