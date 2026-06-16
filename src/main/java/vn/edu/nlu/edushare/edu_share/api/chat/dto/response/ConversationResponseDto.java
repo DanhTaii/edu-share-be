@@ -1,21 +1,21 @@
-package vn.edu.nlu.edushare.edu_share.api.chat.dto;
+package vn.edu.nlu.edushare.edu_share.api.chat.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatListResponseDto {
+public class ConversationResponseDto {
 
     private Integer conversationId;
     private String partnerId;
     private String partnerName;
     private String partnerAvatarUrl;
     private String lastMessage;
-    private LocalDateTime updatedAt;
+    private Timestamp updatedAt;
 
 }

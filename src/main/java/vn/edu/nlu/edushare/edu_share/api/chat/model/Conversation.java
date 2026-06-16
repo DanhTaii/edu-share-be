@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "conversations")
@@ -27,5 +27,5 @@ public class Conversation {
 
     private String lastMessage;
 
-    private LocalDateTime updatedAt;
+    private Timestamp updatedAt;
 }

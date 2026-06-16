@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import vn.edu.nlu.edushare.edu_share.api.chat.dto.ChatListResponseDto;
+import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.model.Conversation;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Integer> {
 
-    @Query("SELECT new vn.edu.nlu.edushare.edu_share.api.chat.dto.ChatListResponseDto(" +
+    @Query("SELECT new vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto(" +
             "c.id, " +
             "CASE WHEN c.userOne.id = :userId THEN c.userTwo.id ELSE c.userOne.id END, " +
             "CASE WHEN c.userOne.id = :userId THEN c.userTwo.fullName ELSE c.userOne.fullName END, " +
@@ -24,5 +24,5 @@ public interface ConversationRepository extends JpaRepository<Conversation, Inte
             "JOIN c.userTwo " +
             "WHERE c.userOne.id = :userId OR c.userTwo.id = :userId " +
             "ORDER BY c.updatedAt DESC")
-    List<ChatListResponseDto> findUserConversations(@Param("userId") String userId);
+    List<ConversationResponseDto> findUserConversations(@Param("userId") String userId);
 }
