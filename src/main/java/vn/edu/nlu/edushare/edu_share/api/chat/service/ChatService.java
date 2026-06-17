@@ -77,4 +77,9 @@ public class ChatService {
             throw new RuntimeException("Error saving message: " + e.getMessage());
         }
     }
+
+    @Transactional
+    public int markMessagesAsRead(Integer conversationId, String userId) {
+        return messageRepository.markMessagesAsRead(conversationId, userId);
+    }
 }

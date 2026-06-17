@@ -12,17 +12,25 @@ import java.util.List;
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Integer> {
 
-    @Query("SELECT new vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto(" +
-            "c.id, " +
-            "CASE WHEN c.userOne.id = :userId THEN c.userTwo.id ELSE c.userOne.id END, " +
-            "CASE WHEN c.userOne.id = :userId THEN c.userTwo.fullName ELSE c.userOne.fullName END, " +
-            "CASE WHEN c.userOne.id = :userId THEN c.userTwo.avatarUrl ELSE c.userOne.avatarUrl END, " +
-            "c.lastMessage, " +
-            "c.updatedAt) " +
-            "FROM Conversation c " +
-            "JOIN c.userOne " +
-            "JOIN c.userTwo " +
-            "WHERE c.userOne.id = :userId OR c.userTwo.id = :userId " +
-            "ORDER BY c.updatedAt DESC")
+    @Query("""
+                SELECT new vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto(
+                    c.id,
+                    CASE WHEN c.userOne.id = :userId THEN c.userTwo.id ELSE c.userOne.id END,
+                    CASE WHEN c.userOne.id = :userId THEN c.userTwo.fullName ELSE c.userOne.fullName END,
+                    CASE WHEN c.userOne.id = :userId THEN c.userTwo.avatarUrl ELSE c.userOne.avatarUrl END,
+                    c.lastMessage,
+                    c.updatedAt,
+                    (
+                        SELECT COUNT(m)
+                        FROM Message m
+                        WHERE m.conversation.id = c.id
+                        AND m.isRead = false
+                        AND m.senderId <> :userId
+                    )
+                )
+                FROM Conversation c
+                WHERE c.userOne.id = :userId OR c.userTwo.id = :userId
+                ORDER BY c.updatedAt DESC
+            """)
     List<ConversationResponseDto> findUserConversations(@Param("userId") String userId);
 }
