@@ -12,9 +12,9 @@ import java.sql.Timestamp;
 public class ConversationResponseDto {
 
     private Integer conversationId;
-    private String partnerId;
-    private String partnerName;
-    private String partnerAvatarUrl;
+    private String recipientId;
+    private String recipientName;
+    private String recipientAvatarUrl;
     private String lastMessage;
     private Timestamp updatedAt;
 
