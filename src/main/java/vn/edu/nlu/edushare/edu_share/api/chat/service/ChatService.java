@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.request.MessageRequestDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.MessageResponseDto;
+import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.MessageStatusResponse;
 import vn.edu.nlu.edushare.edu_share.api.chat.model.Conversation;
 import vn.edu.nlu.edushare.edu_share.api.chat.model.Message;
 import vn.edu.nlu.edushare.edu_share.api.chat.repository.ConversationRepository;
@@ -78,8 +79,16 @@ public class ChatService {
         }
     }
 
-    @Transactional
-    public int markMessagesAsRead(Integer conversationId, String userId) {
-        return messageRepository.markMessagesAsRead(conversationId, userId);
+//    @Transactional
+    public int markMessagesAsRead(Integer conversationId, String userId, String recipientId) {
+        String destinationStatus = "/topic/receipts/" + recipientId;
+
+        int result = messageRepository.markMessagesAsRead(conversationId, userId);
+        if (result > 0) {
+            MessageStatusResponse statusResponse = new MessageStatusResponse(conversationId, userId, true);
+            messagingTemplate.convertAndSend(destinationStatus, statusResponse);
+        }
+
+        return result;
     }
 }

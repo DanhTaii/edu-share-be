@@ -39,12 +39,12 @@ public class MessageRestController {
     }
 
     @PutMapping("/messages/{conversationId}/read")
-    public ResponseEntity<Integer> markMessageAsRead(@PathVariable Integer conversationId, @RequestParam String userId) {
+    public ResponseEntity<Integer> markMessageAsRead(@PathVariable Integer conversationId, @RequestParam String userId, @RequestParam String recipientId) {
         System.out.println("MARK READ API CALLED");
         System.out.println("conversationId = " + conversationId);
         System.out.println("userId = " + userId);
 
-        int updatedRows = chatService.markMessagesAsRead(conversationId, userId);
+        int updatedRows = chatService.markMessagesAsRead(conversationId, userId, recipientId);
 
         System.out.println("updatedRows = " + updatedRows);
 
