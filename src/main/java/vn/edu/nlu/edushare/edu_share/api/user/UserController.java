@@ -14,6 +14,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(userService.getCurrentUser(token));
+    }
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserRegistrationRequest request) {
         try {
