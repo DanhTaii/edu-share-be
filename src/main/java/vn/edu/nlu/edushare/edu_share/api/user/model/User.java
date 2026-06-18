@@ -20,7 +20,7 @@ public class User {
 
     @Id
     @Column(length = 50)
-    private String id; // Đây chính là Firebase UID
+    private String id;
 
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
@@ -28,8 +28,14 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column(nullable = false, length = 20)
+    private String phone;
+
     @Column(name = "student_code", unique = true, length = 20)
     private String studentCode;
+
+    @Column(nullable = false)
+    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "ENUM('STUDENT', 'ADMIN')")
@@ -53,6 +59,10 @@ public class User {
     private LocalDateTime updatedAt;
 
     public enum Role {
-        STUDENT, ADMIN
+        STUDENT,
+        ADMIN
     }
+
+
+
 }
