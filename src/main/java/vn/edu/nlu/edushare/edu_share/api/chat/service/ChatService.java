@@ -2,6 +2,7 @@ package vn.edu.nlu.edushare.edu_share.api.chat.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.request.MessageRequestDto;
@@ -13,6 +14,9 @@ import vn.edu.nlu.edushare.edu_share.api.chat.model.Message;
 import vn.edu.nlu.edushare.edu_share.api.chat.repository.ConversationRepository;
 import vn.edu.nlu.edushare.edu_share.api.chat.repository.MessageRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,8 +36,9 @@ public class ChatService {
         return conversationRepository.findUserConversations(userId);
     }
 
-    public List<MessageResponseDto> getUserMessages(Integer conversationId) {
-        return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId);
+    public Page<MessageResponseDto> getUserMessages(Integer conversationId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return messageRepository.findByConversationIdOrderByCreatedAtAsc(conversationId, pageable);
     }
 
     @Transactional
@@ -42,6 +47,23 @@ public class ChatService {
             // 1. Tìm Conversation
             Conversation conversation = conversationRepository.findById(chatMessageDto.getConversationId())
                     .orElseThrow(() -> new RuntimeException("Conversation not found"));
+
+            // Kiểm tra xem có phải người trong đoạn hội thoại k
+            String senderId = chatMessageDto.getSenderId();
+            String actualRecipientId;
+
+            // Nếu người gửi là User 1, thì người nhận chắc chắn là User 2
+            if (senderId.equals(conversation.getUserOne().getId())) {
+                actualRecipientId = conversation.getUserTwo().getId();
+            }
+            // Ngược lại, nếu người gửi là User 2, thì người nhận là User 1
+            else if (senderId.equals(conversation.getUserTwo().getId())) {
+                actualRecipientId = conversation.getUserOne().getId();
+            }
+            // Nếu không phải 1 trong 2 người này -> Kẻ đột nhập!
+            else {
+                throw new SecurityException("Bạn không thuộc phòng chat này!");
+            }
 
             // 2. Tạo và Lưu Message
             Message message = new Message();
@@ -68,9 +90,13 @@ public class ChatService {
             );
 
             //Tìm đúng đối tượng người nhận để gửi tin nhắn qua WebSocket (chỉ một người nhận sẽ nhận được tin nhắn này)
-            String destination = "/topic/messages/" + chatMessageDto.getRecipientId();
+            String destination = "/topic/messages/" + actualRecipientId;
             // 4. Gửi tin nhắn qua WebSocket đến người nhận
             messagingTemplate.convertAndSend(destination, responseDto);
+
+            // Bắn ngược lại cho cả thiết bị khác của người gửi (nếu có)
+            String destinationSender = "/topic/messages/" + senderId;
+            messagingTemplate.convertAndSend(destinationSender, responseDto);
 
             // 5. Trả về đúng object Response
             return responseDto;

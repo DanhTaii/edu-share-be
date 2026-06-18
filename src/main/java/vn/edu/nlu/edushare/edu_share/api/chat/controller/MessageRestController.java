@@ -1,5 +1,6 @@
 package vn.edu.nlu.edushare.edu_share.api.chat.controller;
 
+import org.springframework.data.domain.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,29 +26,29 @@ public class MessageRestController {
         return ResponseEntity.ok(conversations);
     }
 
-    @GetMapping("/messages")
-    public ResponseEntity<List<MessageResponseDto>> getUserMessages(@RequestParam Integer conversationId) {
-        List<MessageResponseDto> messages = chatService.getUserMessages(conversationId);
+    @GetMapping("/{conversationId}/messages")
+    public ResponseEntity<Page<MessageResponseDto>> getUserMessages(
+            @PathVariable Integer conversationId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Page<MessageResponseDto> messages = chatService.getUserMessages(conversationId, page, size);
         return ResponseEntity.ok(messages);
     }
 
-    @PostMapping("/messages")
-    public ResponseEntity<MessageResponseDto> sendMessage(@RequestBody MessageRequestDto chatMessageDto) {
+    @PostMapping("/{conversationId}/messages")
+    public ResponseEntity<MessageResponseDto> sendMessage(
+            @PathVariable Integer conversationId,
+            @RequestBody MessageRequestDto chatMessageDto
+    ) {
+        chatMessageDto.setConversationId(conversationId);
         MessageResponseDto savedMessage = chatService.saveMessage(chatMessageDto);
-        //khi bạn muốn trả dữ liệu về cho client, ví dụ danh sách tin nhắn.
         return ResponseEntity.ok(savedMessage);
     }
 
-    @PutMapping("/messages/{conversationId}/read")
+    @PutMapping("/{conversationId}/messages/read")
     public ResponseEntity<Integer> markMessageAsRead(@PathVariable Integer conversationId, @RequestParam String userId, @RequestParam String recipientId) {
-        System.out.println("MARK READ API CALLED");
-        System.out.println("conversationId = " + conversationId);
-        System.out.println("userId = " + userId);
-
         int updatedRows = chatService.markMessagesAsRead(conversationId, userId, recipientId);
-
-        System.out.println("updatedRows = " + updatedRows);
-
         return ResponseEntity.ok(updatedRows);
     }
 }

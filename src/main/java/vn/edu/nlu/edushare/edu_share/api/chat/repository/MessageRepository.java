@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.MessageResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.model.Message;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface MessageRepository extends JpaRepository<Message, Integer> {
@@ -15,11 +17,12 @@ public interface MessageRepository extends JpaRepository<Message, Integer> {
             "m.id, m.conversation.id, m.senderId, m.content, m.isRead, m.createdAt) " +
             "FROM Message m " +
             "WHERE m.conversation.id = :conversationId " +
-            "ORDER BY m.createdAt ASC")
-    List<MessageResponseDto> findByConversationIdOrderByCreatedAtAsc(@Param("conversationId") Integer conversationId);
+            "ORDER BY m.createdAt DESC")
+    Page<MessageResponseDto> findByConversationIdOrderByCreatedAtAsc(@Param("conversationId") Integer conversationId, Pageable pageable);
 
     // Thường xuyên sử dụng @Modifying khi bạn muốn thực hiện các thao tác thay đổi dữ liệu
     // (như INSERT, UPDATE, DELETE) trong cơ sở dữ liệu thông qua JPA.
+    @Transactional
     @Modifying
     @Query("UPDATE Message m SET m.isRead = true " +
             "WHERE m.conversation.id = :conversationId " +
