@@ -1,4 +1,4 @@
-package vn.edu.nlu.edushare.edu_share.api.chat.dto;
+package vn.edu.nlu.edushare.edu_share.api.chat.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChatMessageDto {
+public class MessageResponseDto {
     private Integer id;
     private Integer conversationId;
     private String senderId;
