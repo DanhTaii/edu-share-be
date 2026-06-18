@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import vn.edu.nlu.edushare.edu_share.api.chat.dto.request.ConversationCreateRequestDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.request.MessageRequestDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.MessageResponseDto;
@@ -17,6 +18,9 @@ import vn.edu.nlu.edushare.edu_share.api.chat.repository.MessageRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import vn.edu.nlu.edushare.edu_share.api.user.model.User;
+import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,13 +31,15 @@ public class ChatService {
 
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
+    private final UserRepository userRepository;
     // SB tự động tạo ra sẵn công cụ và nạp sẵn cấu hình tần số /topic vào
     // Do @RequiredArgsConstructor nó đã tự nạp Dependency Injection vào rồi nên không cần @Autowired nữa
     // DI này là từ WebSocketConfig.java, nó sẽ tự động nạp vào SimpMessagingTemplate (SB tự động tạo ra)
     private final SimpMessagingTemplate messagingTemplate;
 
-    public List<ConversationResponseDto> getUserConversations(String userId) {
-        return conversationRepository.findUserConversations(userId);
+    public Page<ConversationResponseDto> getUserConversations(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return conversationRepository.findUserConversations(userId, pageable);
     }
 
     public Page<MessageResponseDto> getUserMessages(Integer conversationId, int page, int size) {
@@ -116,5 +122,56 @@ public class ChatService {
         }
 
         return result;
+    }
+
+    @Transactional
+    public MessageResponseDto createConversationAndSendFirstMessage(ConversationCreateRequestDto request) {
+        // 1. Sắp xếp ID để chống trùng lặp phòng chat (đã bàn ở lượt trước)
+        String user1 = request.getSenderId().compareTo(request.getRecipientId()) < 0 ? request.getSenderId() : request.getRecipientId();
+        String user2 = request.getSenderId().compareTo(request.getRecipientId()) > 0 ? request.getSenderId() : request.getRecipientId();
+
+        // 2. Tìm phòng chat cũ hoặc tạo mới nếu chưa có
+        Conversation conversation = conversationRepository.findByUserOneIdAndUserTwoIdAndPostId(user1, user2, request.getPostId())
+                .orElseGet(() -> {
+                    Conversation newConv = new Conversation();
+                    // SỬA Ở ĐÂY: Dùng getReferenceById để lấy Proxy Object (Không tốn câu SELECT)
+                    User u1 = userRepository.getReferenceById(user1);
+                    User u2 = userRepository.getReferenceById(user2);
+
+                    newConv.setUserOne(u1);
+                    newConv.setUserTwo(u2);
+
+                    newConv.setPostId(request.getPostId());
+                    // Nếu bảng của bạn lưu tham chiếu User (Entity), nhớ fetch User từ DB ra set vào nhé
+                    return conversationRepository.save(newConv);
+                });
+
+        // 3. Tạo và lưu tin nhắn đầu tiên
+        Message message = new Message();
+        message.setConversation(conversation);
+        message.setSenderId(request.getSenderId());
+        message.setContent(request.getContent());
+        message.setIsRead(false);
+        Message savedMessage = messageRepository.save(message);
+
+        // 4. Cập nhật last_message cho phòng chat
+        conversation.setLastMessage(request.getContent());
+        conversation.setUpdatedAt(savedMessage.getCreatedAt());
+        conversationRepository.save(conversation);
+
+        // 5. Chuyển sang DTO để trả về
+        MessageResponseDto responseDto = new MessageResponseDto(
+                savedMessage.getId(),
+                conversation.getId(),
+                savedMessage.getSenderId(),
+                savedMessage.getContent(),
+                savedMessage.getIsRead(),
+                savedMessage.getCreatedAt()
+        );
+
+        // 6. Broadcast Real-time qua WebSocket cho người nhận (Người bán)
+        messagingTemplate.convertAndSend("/topic/messages/" + request.getRecipientId(), responseDto);
+
+        return responseDto;
     }
 }
