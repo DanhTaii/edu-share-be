@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import vn.edu.nlu.edushare.edu_share.api.chat.dto.request.ConversationCreateRequestDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.request.MessageRequestDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.chat.dto.response.MessageResponseDto;
@@ -54,5 +55,11 @@ public class MessageRestController {
     public ResponseEntity<Integer> markMessageAsRead(@PathVariable Integer conversationId, @RequestParam String userId, @RequestParam String recipientId) {
         int updatedRows = chatService.markMessagesAsRead(conversationId, userId, recipientId);
         return ResponseEntity.ok(updatedRows);
+    }
+
+    @PostMapping
+    public ResponseEntity<MessageResponseDto> sendFirstMessage(@RequestBody ConversationCreateRequestDto request) {
+        MessageResponseDto response = chatService.createConversationAndSendFirstMessage(request);
+        return ResponseEntity.ok(response);
     }
 }
