@@ -12,6 +12,7 @@ import java.sql.Timestamp;
 public class ConversationResponseDto {
 
     private Integer conversationId;
+    private Integer postId;
     private String recipientId;
     private String recipientName;
     private String recipientAvatarUrl;
@@ -20,8 +21,9 @@ public class ConversationResponseDto {
     private int unreadCount;
 
     // Do unreadCount có thể là Long nên cần constructor riêng để chuyển đổi
-    public ConversationResponseDto(Integer conversationId, String recipientId, String recipientName, String recipientAvatarUrl, String lastMessage, Timestamp updatedAt, Long unreadCount) {
+    public ConversationResponseDto(Integer conversationId, Integer postId, String recipientId, String recipientName, String recipientAvatarUrl, String lastMessage, Timestamp updatedAt, Long unreadCount) {
         this.conversationId = conversationId;
+        this.postId = postId;
         this.recipientId = recipientId;
         this.recipientName = recipientName;
         this.recipientAvatarUrl = recipientAvatarUrl;
@@ -30,8 +32,9 @@ public class ConversationResponseDto {
         this.unreadCount = Math.toIntExact(unreadCount);
     }
 
-    public ConversationResponseDto(Integer conversationId, String recipientId, String recipientName, String recipientAvatarUrl, String lastMessage, Timestamp updatedAt, int unreadCount) {
+    public ConversationResponseDto(Integer conversationId, Integer postId, String recipientId, String recipientName, String recipientAvatarUrl, String lastMessage, Timestamp updatedAt, int unreadCount) {
         this.conversationId = conversationId;
+        this.postId = postId;
         this.recipientId = recipientId;
         this.recipientName = recipientName;
         this.recipientAvatarUrl = recipientAvatarUrl;

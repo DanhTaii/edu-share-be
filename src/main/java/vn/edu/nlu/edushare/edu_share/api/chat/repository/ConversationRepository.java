@@ -17,6 +17,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Inte
     @Query("""
                 SELECT new vn.edu.nlu.edushare.edu_share.api.chat.dto.response.ConversationResponseDto(
                     c.id,
+                    c.postId,
                     CASE WHEN c.userOne.id = :userId THEN c.userTwo.id ELSE c.userOne.id END,
                     CASE WHEN c.userOne.id = :userId THEN c.userTwo.fullName ELSE c.userOne.fullName END,
                     CASE WHEN c.userOne.id = :userId THEN c.userTwo.avatarUrl ELSE c.userOne.avatarUrl END,
