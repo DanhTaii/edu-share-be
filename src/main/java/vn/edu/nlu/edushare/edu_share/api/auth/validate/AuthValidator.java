@@ -1,6 +1,7 @@
 package vn.edu.nlu.edushare.edu_share.api.auth.validate;
 
 import org.springframework.stereotype.Component;
+import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.LoginRequest;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.RegisterRequest;
 
 @Component
@@ -59,6 +60,17 @@ public class AuthValidator {
         // Confirm Password
         if (confirmPassword == null || !confirmPassword.equals(password)) {
             throw new IllegalArgumentException("Mật khẩu không khớp");
+        }
+    }
+
+    public void validateLogin(LoginRequest request) {
+
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email không được để trống");
+        }
+
+        if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mật khẩu không được để trống");
         }
     }
 }

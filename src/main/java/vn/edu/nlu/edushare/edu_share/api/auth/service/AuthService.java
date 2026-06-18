@@ -4,7 +4,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.LoginRequest;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.RegisterRequest;
+import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.LoginResponse;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.RegisterResponse;
 import vn.edu.nlu.edushare.edu_share.api.auth.repository.AuthRepository;
 import vn.edu.nlu.edushare.edu_share.api.auth.validate.AuthValidator;
@@ -19,6 +21,7 @@ public class AuthService {
     private final AuthRepository authRepository;
     private final AuthValidator authValidator;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public RegisterResponse register(RegisterRequest request) {
 
@@ -45,9 +48,22 @@ public class AuthService {
 
         authRepository.save(user);
 
-        return RegisterResponse.builder()
-                .success(true)
-                .message("Đăng ký thành công")
-                .build();
+        return RegisterResponse.builder().success(true).message("Đăng ký thành công").build();
+    }
+
+    public LoginResponse login(LoginRequest request) {
+
+        authValidator.validateLogin(request);
+
+        User user = authRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Sai mật khẩu");
+        }
+
+        String token = jwtService.generateToken(user);
+
+        return LoginResponse.builder().success(true).message("Đăng nhập thành công").token(token).build();
     }
 }
