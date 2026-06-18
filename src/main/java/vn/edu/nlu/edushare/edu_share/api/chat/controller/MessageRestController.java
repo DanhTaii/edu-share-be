@@ -21,8 +21,12 @@ public class MessageRestController {
     private final ChatService chatService;
 
     @GetMapping
-    public ResponseEntity<List<ConversationResponseDto>> getUserConversations(@RequestParam String userId) {
-        List<ConversationResponseDto> conversations = chatService.getUserConversations(userId);
+    public ResponseEntity<Page<ConversationResponseDto>> getUserConversations(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Page<ConversationResponseDto> conversations = chatService.getUserConversations(userId, page, size);
         return ResponseEntity.ok(conversations);
     }
 

@@ -1,5 +1,7 @@
 package vn.edu.nlu.edushare.edu_share.api.chat.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,5 +34,5 @@ public interface ConversationRepository extends JpaRepository<Conversation, Inte
                 WHERE c.userOne.id = :userId OR c.userTwo.id = :userId
                 ORDER BY c.updatedAt DESC
             """)
-    List<ConversationResponseDto> findUserConversations(@Param("userId") String userId);
+    Page<ConversationResponseDto> findUserConversations(@Param("userId") String userId, Pageable pageable);
 }

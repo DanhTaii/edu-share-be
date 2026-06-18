@@ -32,8 +32,9 @@ public class ChatService {
     // DI này là từ WebSocketConfig.java, nó sẽ tự động nạp vào SimpMessagingTemplate (SB tự động tạo ra)
     private final SimpMessagingTemplate messagingTemplate;
 
-    public List<ConversationResponseDto> getUserConversations(String userId) {
-        return conversationRepository.findUserConversations(userId);
+    public Page<ConversationResponseDto> getUserConversations(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return conversationRepository.findUserConversations(userId, pageable);
     }
 
     public Page<MessageResponseDto> getUserMessages(Integer conversationId, int page, int size) {
