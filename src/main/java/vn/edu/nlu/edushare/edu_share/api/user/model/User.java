@@ -1,5 +1,6 @@
 package vn.edu.nlu.edushare.edu_share.api.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +35,8 @@ public class User {
     @Column(name = "student_code", unique = true, length = 20)
     private String studentCode;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)

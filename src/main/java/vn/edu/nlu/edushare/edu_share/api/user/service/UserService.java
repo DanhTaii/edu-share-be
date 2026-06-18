@@ -2,6 +2,7 @@ package vn.edu.nlu.edushare.edu_share.api.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import vn.edu.nlu.edushare.edu_share.api.auth.service.JwtService;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
 import vn.edu.nlu.edushare.edu_share.api.user.request.UserRegistrationRequest;
@@ -10,6 +11,9 @@ import java.util.*;
 
 @Service
 public class UserService {
+
+    @Autowired
+    private JwtService jwtService;
 
     @Autowired
     private UserRepository userRepository;
@@ -67,5 +71,10 @@ public class UserService {
     public void deleteUser(String id) {
         User user = getUserById(id);
         userRepository.delete(user);
+    }
+
+    public User getCurrentUser(String token) {
+        String email = jwtService.extractEmail(token);
+        return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
     }
 }

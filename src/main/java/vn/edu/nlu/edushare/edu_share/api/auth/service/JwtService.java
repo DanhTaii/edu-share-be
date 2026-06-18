@@ -32,4 +32,13 @@ public class JwtService {
             return false;
         }
     }
+
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
 }
