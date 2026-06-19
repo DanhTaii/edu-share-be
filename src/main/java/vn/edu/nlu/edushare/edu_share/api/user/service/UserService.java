@@ -61,7 +61,7 @@ public class UserService {
 
         user.setFullName(userDetails.getFullName());
         user.setAvatarUrl(userDetails.getAvatarUrl());
-        user.setFcmToken(userDetails.getFcmToken());
+//        user.setFcmToken(userDetails.getFcmToken());
         user.setVerified(userDetails.isVerified());
 
         return userRepository.save(user);

@@ -49,8 +49,8 @@ public class User {
     @Column(name = "is_verified")
     private boolean isVerified = false;
 
-    @Column(name = "fcm_token", columnDefinition = "TEXT")
-    private String fcmToken;
+//    @Column(name = "fcm_token", columnDefinition = "TEXT")
+//    private String fcmToken;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
