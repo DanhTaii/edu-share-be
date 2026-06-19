@@ -64,6 +64,13 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
 
-        return LoginResponse.builder().success(true).message("Đăng nhập thành công").token(token).build();
+        return LoginResponse.builder()
+                .success(true)
+                .message("Đăng nhập thành công")
+                .token(token)
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .build();
     }
 }
