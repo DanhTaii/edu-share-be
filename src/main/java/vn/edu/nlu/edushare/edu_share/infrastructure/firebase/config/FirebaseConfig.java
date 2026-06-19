@@ -1,4 +1,4 @@
-package vn.edu.nlu.edushare.edu_share.config;
+package vn.edu.nlu.edushare.edu_share.infrastructure.firebase.config;
 
 
 import com.google.auth.oauth2.GoogleCredentials;
@@ -11,6 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.io.InputStream;
 
+//Chạy 1 lần duy nhất khi Server khởi động để thiết lập đường truyền an toàn với Google.
 @Configuration
 public class FirebaseConfig {
 

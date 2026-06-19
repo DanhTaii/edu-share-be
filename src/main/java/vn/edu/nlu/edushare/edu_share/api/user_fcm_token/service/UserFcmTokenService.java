@@ -1,22 +1,18 @@
 package vn.edu.nlu.edushare.edu_share.api.user_fcm_token.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import vn.edu.nlu.edushare.edu_share.api.user_fcm_token.model.UserFcmToken;
 import vn.edu.nlu.edushare.edu_share.api.user_fcm_token.repository.UserFcmTokenRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 //(Người Thủ thư): Chỉ làm đúng một việc là quản lý "Danh bạ" (Database MySQL).
 // Nó nhận token từ Android gửi lên, kiểm tra xem máy mới hay máy cũ, ghi đè hay tạo mới.
 // Nó không hề biết Google Firebase là cái gì.
 @Service
-public class NotificationService {
+public class UserFcmTokenService {
 
     @Autowired
     private UserFcmTokenRepository userFcmTokenRepository;
