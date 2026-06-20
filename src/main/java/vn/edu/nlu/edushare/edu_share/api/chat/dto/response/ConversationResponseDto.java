@@ -1,5 +1,6 @@
 package vn.edu.nlu.edushare.edu_share.api.chat.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class ConversationResponseDto {
     private String recipientName;
     private String recipientAvatarUrl;
     private String lastMessage;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private Timestamp updatedAt;
     private int unreadCount;
 
