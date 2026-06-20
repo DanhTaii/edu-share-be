@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.LoginRequest;
+import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.OcrLoginRequest;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.RegisterRequest;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.LoginResponse;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.RegisterResponse;
@@ -26,4 +27,10 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }
+
+    @PostMapping("/ocr-login")
+    public ResponseEntity<LoginResponse> ocrLogin(@RequestBody OcrLoginRequest request) {
+        return ResponseEntity.ok(authService.ocrLogin(request));
+    }
+
 }
