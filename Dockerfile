@@ -7,7 +7,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Thiết lập môi trường chạy ứng dụng Spring Boot
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 # Lấy file .jar đã build ở Stage 1 đem qua đây
 COPY --from=build /app/target/*.jar app.jar
