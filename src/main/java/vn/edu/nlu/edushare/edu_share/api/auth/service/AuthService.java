@@ -78,19 +78,24 @@ public class AuthService {
     }
 
     public LoginResponse ocrLogin(OcrLoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new RuntimeException("Không đọc được email từ OCR");
+        }
+
+        User user = userRepository.findByStudentCode(request.getStudentCode())
                 .orElseGet(() -> {
-                    // Nếu chưa có thì tạo mới
-                    User newUser = User.builder()
-                            .id(UUID.randomUUID().toString())
-                            .fullName(request.getFullName())
-                            .email(request.getEmail())
-                            .studentCode(request.getStudentCode())
-                            .phone("") // OCR không có phone
-                            .role(User.Role.STUDENT)
-                            .isVerified(false) // hoặc false tùy yêu cầu xác thực
-                            .password(passwordEncoder.encode(UUID.randomUUID().toString())) // mật khẩu random
-                            .build();
+                    User newUser =
+                            User.builder()
+                                    .id(UUID.randomUUID().toString())
+                                    .fullName(request.getFullName())
+                                    .email(request.getEmail())
+                                    .studentCode(request.getStudentCode())
+                                    .phone("")
+                                    .role(User.Role.STUDENT)
+                                    .isVerified(false)
+                                    .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                                    .build();
                     return userRepository.save(newUser);
                 });
 
