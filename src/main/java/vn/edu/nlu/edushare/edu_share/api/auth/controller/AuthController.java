@@ -30,6 +30,10 @@ public class AuthController {
 
     @PostMapping("/ocr-login")
     public ResponseEntity<LoginResponse> ocrLogin(@RequestBody OcrLoginRequest request) {
+        System.out.println("===== OCR LOGIN =====");
+        System.out.println(request.getStudentCode());
+        System.out.println(request.getFullName());
+        System.out.println(request.getEmail());
         return ResponseEntity.ok(authService.ocrLogin(request));
     }
 
