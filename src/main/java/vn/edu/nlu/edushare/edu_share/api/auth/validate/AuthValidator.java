@@ -53,8 +53,11 @@ public class AuthValidator {
             throw new IllegalArgumentException("Mật khẩu không được để trống");
         }
 
-        if (password.length() < 6) {
-            throw new IllegalArgumentException("Mật khẩu tối thiểu 6 ký tự");
+        String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&.#_\\-])[A-Za-z\\d@$!%*?&.#_\\-]{8,25}$";
+
+        if (!password.matches(passwordRegex)) {
+            throw new IllegalArgumentException(
+                    "Mật khẩu phải từ 8 đến 25 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
         }
 
         // Confirm Password
