@@ -30,8 +30,9 @@ public class AuthValidator {
             throw new IllegalArgumentException("Email không được để trống");
         }
 
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            throw new IllegalArgumentException("Email không hợp lệ");
+        String emailRegex = "^[0-9]{8}@st\\.hcmuaf\\.edu\\.vn$";
+        if (!email.matches(emailRegex)) {
+            throw new IllegalArgumentException("Email phải có dạng MSSV@st.hcmuaf.edu.vn (VD: 23130192@st.hcmuaf.edu.vn)");
         }
 
         // Student Code

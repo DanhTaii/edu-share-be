@@ -9,6 +9,7 @@ import vn.edu.nlu.edushare.edu_share.api.auth.dto.request.RegisterRequest;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.LoginResponse;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.RegisterResponse;
 import vn.edu.nlu.edushare.edu_share.api.auth.service.AuthService;
+import vn.edu.nlu.edushare.edu_share.api.mail.request.SendOtpRequest;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -26,6 +27,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    // làm này để gửi mail xác thực người dùng khi đăng ký
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody SendOtpRequest request) {
+        return ResponseEntity.ok(authService.sendOtp(request));
     }
 
     @PostMapping("/ocr-login")
