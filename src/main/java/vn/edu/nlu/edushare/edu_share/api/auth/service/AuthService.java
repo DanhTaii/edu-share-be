@@ -11,9 +11,15 @@ import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.LoginResponse;
 import vn.edu.nlu.edushare.edu_share.api.auth.dto.response.RegisterResponse;
 import vn.edu.nlu.edushare.edu_share.api.auth.repository.AuthRepository;
 import vn.edu.nlu.edushare.edu_share.api.auth.validate.AuthValidator;
+import vn.edu.nlu.edushare.edu_share.api.mail.model.EmailVerification;
+import vn.edu.nlu.edushare.edu_share.api.mail.repository.EmailVerificationRepository;
+import vn.edu.nlu.edushare.edu_share.api.mail.request.SendOtpRequest;
+import vn.edu.nlu.edushare.edu_share.api.mail.service.EmailService;
+import vn.edu.nlu.edushare.edu_share.api.mail.util.OtpGenerator;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -25,6 +31,8 @@ public class AuthService {
     private final AuthValidator authValidator;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final EmailVerificationRepository emailVerificationRepository;
+    private final EmailService emailService;
 
     public RegisterResponse register(RegisterRequest request) {
 
@@ -52,6 +60,28 @@ public class AuthService {
         authRepository.save(user);
 
         return RegisterResponse.builder().success(true).message("Đăng ký thành công").build();
+    }
+
+    public String sendOtp(SendOtpRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại");
+        }
+
+        emailVerificationRepository.findTopByEmailOrderByExpiredAtDesc(request.getEmail())
+                .ifPresent(emailVerificationRepository::delete);
+
+        String otp = OtpGenerator.generateOtp();
+
+        EmailVerification verification = new EmailVerification();
+        verification.setEmail(request.getEmail());
+        verification.setOtpCode(otp);
+        verification.setExpiredAt(LocalDateTime.now().plusMinutes(5));
+
+        emailVerificationRepository.save(verification);
+        emailService.sendOtp(request.getEmail(), otp);
+
+        return "Đã gửi mã OTP: " + otp;
     }
 
     public LoginResponse login(LoginRequest request) {
