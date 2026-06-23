@@ -5,6 +5,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostListItemResponseDto;
+import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostMapResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostSummaryResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.repository.PostListItemProjection;
 import vn.edu.nlu.edushare.edu_share.api.article.repository.PostRepository;
@@ -46,5 +47,26 @@ public class PostService {
                 .authorId(post.getAuthorId())
                 .authorName(post.getAuthorName())
                 .build();
+    }
+    //
+    // Thêm vào cuối class, trước dấu }
+    public List<PostMapResponseDto> getPostsForMap(String area, String keyword) {
+        String areaParam    = (area    != null && !area.isBlank())    ? area    : null;
+        String keywordParam = (keyword != null && !keyword.isBlank()) ? keyword : null;
+
+        return postRepository.findPostsForMap(areaParam, keywordParam)
+                .stream()
+                .map(p -> PostMapResponseDto.builder()
+                        .id(p.getId())
+                        .title(p.getTitle())
+                        .description(p.getDescription())
+                        .imageUrl(p.getImageUrl())
+                        .price(p.getPrice())
+                        .status(p.getStatus())
+                        .areaName(p.getAreaName())
+                        .latitude(p.getLatitude())
+                        .longitude(p.getLongitude())
+                        .build())
+                .toList();
     }
 }
