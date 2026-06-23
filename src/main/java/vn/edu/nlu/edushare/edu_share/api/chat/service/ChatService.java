@@ -17,10 +17,9 @@ import vn.edu.nlu.edushare.edu_share.api.chat.repository.MessageRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import vn.edu.nlu.edushare.edu_share.api.notification.NotificationService;
+import vn.edu.nlu.edushare.edu_share.api.notification.service.NotificationService;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
-import vn.edu.nlu.edushare.edu_share.infrastructure.firebase.service.FcmService;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;

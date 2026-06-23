@@ -2,6 +2,7 @@ package vn.edu.nlu.edushare.edu_share.api.user_fcm_token.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 
 import java.sql.Timestamp;
 
@@ -13,8 +14,9 @@ public class UserFcmToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "user_id", nullable = false)
-    private String userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "fcm_token", nullable = false, length = 1000)
     private String fcmToken;
