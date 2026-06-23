@@ -1,7 +1,9 @@
 package vn.edu.nlu.edushare.edu_share.api.article.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostListItemResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostSummaryResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.repository.PostListItemProjection;
@@ -19,6 +21,10 @@ public class PostService {
                 .stream()
                 .map(this::toPostListItem)
                 .toList();
+    }
+
+    public PostDetailResponseDTO getDetailPost(Integer postId) {
+        return postRepository.findPostDetail(postId);
     }
 
     public PostSummaryResponseDto getPostSummaryById(Integer postId) {
