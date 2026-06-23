@@ -46,15 +46,17 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<PostListItemProjection> findVisiblePostList();
 
     @Query(value = """
-        SELECT new vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO(
-            p.id, p.title, p.description, p.price, p.imageUrl, p.status, p.transactionType, 
-            c.id, c.name, l.id, l.latitude, l.longitude, l.areaName, u.id, u.fullName
-        )
-        FROM Post p
-        LEFT JOIN p.category c
-        LEFT JOIN p.location l
-        LEFT JOIN p.author u
-        WHERE p.id = :postId
-        """)
+    SELECT new vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO(
+        p.id, p.title, p.description, p.price, p.imageUrl, p.status, p.transactionType,
+        c.id, c.name, 
+        l.id, l.latitude, l.longitude, l.areaName, 
+        u.id, u.fullName, u.avatarUrl, u.isVerified
+    )
+    FROM Post p
+    LEFT JOIN p.category c
+    LEFT JOIN p.location l
+    LEFT JOIN p.author u
+    WHERE p.id = :postId
+    """)
     PostDetailResponseDTO findPostDetail(@Param("postId") Integer postId);
     }
