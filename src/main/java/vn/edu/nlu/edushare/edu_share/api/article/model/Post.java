@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import vn.edu.nlu.edushare.edu_share.api.category.model.Category;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 
 import java.time.LocalDateTime;
@@ -27,11 +28,13 @@ public class Post {
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private User author;
 
-    @Column(name = "category_id")
-    private Integer categoryId;
+    @ManyToOne
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private Category category;
 
-    @Column(name = "location_id")
-    private Integer locationId;
+    @ManyToOne
+    @JoinColumn(name = "location_id", insertable = false, updatable = false)
+    private LocationDemo location;
 
     @Column(nullable = false, length = 200)
     private String title;
@@ -48,6 +51,10 @@ public class Post {
     @Column(length = 20)
     private Status status = Status.AVAILABLE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private TransactionType transactionType = TransactionType.FREE;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -60,5 +67,10 @@ public class Post {
         AVAILABLE,
         SOLD,
         HIDDEN
+    }
+    public enum TransactionType {
+        FREE,
+        SALE,
+        EXCHANGE
     }
 }

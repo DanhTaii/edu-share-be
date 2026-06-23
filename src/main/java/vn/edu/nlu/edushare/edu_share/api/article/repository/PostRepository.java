@@ -3,6 +3,7 @@ package vn.edu.nlu.edushare.edu_share.api.article.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostSummaryResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.model.Post;
 
@@ -43,4 +44,17 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             ORDER BY p.created_at DESC, p.id DESC
             """, nativeQuery = true)
     List<PostListItemProjection> findVisiblePostList();
-}
+
+    @Query(value = """
+        SELECT new vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO(
+            p.id, p.title, p.description, p.price, p.imageUrl, p.status, p.transactionType, 
+            c.id, c.name, l.id, l.latitude, l.longitude, l.areaName, u.id, u.fullName
+        )
+        FROM Post p
+        LEFT JOIN p.category c
+        LEFT JOIN p.location l
+        LEFT JOIN p.author u
+        WHERE p.id = :postId
+        """)
+    PostDetailResponseDTO findPostDetail(@Param("postId") Integer postId);
+    }

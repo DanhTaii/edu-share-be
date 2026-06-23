@@ -2,10 +2,8 @@ package vn.edu.nlu.edushare.edu_share.api.article.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostListItemResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostSummaryResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.service.PostService;
@@ -30,6 +28,11 @@ public class PostController {
     ) {
         PostSummaryResponseDto postSummary = postService.getPostSummaryById(postId);
         return ResponseEntity.ok(postSummary);
+    }
+
+    @GetMapping("/detail")
+    public ResponseEntity<PostDetailResponseDTO> getDetailPost(@RequestParam Integer postId) {
+        return ResponseEntity.ok(postService.getDetailPost(postId));
     }
 
 }
