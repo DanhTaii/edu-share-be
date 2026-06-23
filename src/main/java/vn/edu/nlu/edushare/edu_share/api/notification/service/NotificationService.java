@@ -1,6 +1,9 @@
 package vn.edu.nlu.edushare.edu_share.api.notification.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.edu.nlu.edushare.edu_share.api.notification.dto.response.NotificationResponseProjection;
 import vn.edu.nlu.edushare.edu_share.api.notification.model.Notification;
@@ -72,7 +75,8 @@ public class NotificationService {
         return notificationRepository.findSingleNotificationWithImage(dbNotification.getId());
     }
 
-    public List<NotificationResponseProjection> getNotificationByUserId(String userId) {
-        return notificationRepository.findNotificationsWithPostImage(userId);
+    public Page<NotificationResponseProjection> getNotificationByUserId(String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return notificationRepository.findNotificationsWithPostImage(userId, pageable);
     }
 }

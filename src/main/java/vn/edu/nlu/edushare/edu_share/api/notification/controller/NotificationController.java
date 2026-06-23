@@ -1,6 +1,7 @@
 package vn.edu.nlu.edushare.edu_share.api.notification.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.edushare.edu_share.api.notification.dto.request.NotificationRequestDto;
@@ -28,9 +29,13 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationResponseProjection>> getUserNotifications(@RequestParam String userId) {
+    public ResponseEntity<Page<NotificationResponseProjection>> getUserNotifications(
+            @RequestParam String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
         // Lấy danh sách thông báo của user này, sắp xếp mới nhất lên đầu
-        List<NotificationResponseProjection> notifications = notificationService.getNotificationByUserId(userId);
+        Page<NotificationResponseProjection> notifications = notificationService.getNotificationByUserId(userId, page, size);
         return ResponseEntity.ok(notifications);
     }
 
