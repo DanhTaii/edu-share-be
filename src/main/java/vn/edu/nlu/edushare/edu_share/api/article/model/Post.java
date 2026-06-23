@@ -1,29 +1,64 @@
 package vn.edu.nlu.edushare.edu_share.api.article.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "posts")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String authorId;
-    private int categoryId;
-    private int locationId;
 
+    @ManyToOne
+    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    private User author;
+
+    @Column(name = "category_id")
+    private Integer categoryId;
+
+    @Column(name = "location_id")
+    private Integer locationId;
+
+    @Column(nullable = false, length = 200)
     private String title;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private Double price;
+
+    @Column(name = "image_url")
     private String imageUrl;
 
-    private String status;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private Status status = Status.AVAILABLE;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    public enum Status {
+        AVAILABLE,
+        SOLD,
+        HIDDEN
+    }
 }

@@ -27,14 +27,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-
         String path = request.getServletPath();
-        if (path.startsWith("/api/auth/")) {
+        if (isPublicPath(path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -59,8 +58,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/api/auth/");
+        return isPublicPath(request.getServletPath());
     }
 
+    private boolean isPublicPath(String path) {
+        return path.startsWith("/api/auth/")
+                || path.startsWith("/posts")
+                || path.startsWith("/ws-edushare/");
+    }
 }
