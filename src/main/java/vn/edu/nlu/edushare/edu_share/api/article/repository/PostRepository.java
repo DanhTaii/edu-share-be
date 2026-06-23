@@ -57,4 +57,28 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
         WHERE p.id = :postId
         """)
     PostDetailResponseDTO findPostDetail(@Param("postId") Integer postId);
+
+    //
+    @Query(value = """
+    SELECT
+        p.id          AS id,
+        p.title       AS title,
+        p.description AS description,
+        p.image_url   AS imageUrl,
+        p.price       AS price,
+        p.status      AS status,
+        l.area_name   AS areaName,
+        l.latitude    AS latitude,
+        l.longitude   AS longitude
+    FROM posts p
+    INNER JOIN locations l ON l.id = p.location_id
+    WHERE p.status = 'AVAILABLE'
+      AND (:area    IS NULL OR l.area_name = :area)
+      AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')))
+    ORDER BY p.created_at DESC
+    """, nativeQuery = true)
+    List<PostMapProjection> findPostsForMap(
+            @Param("area")    String area,
+            @Param("keyword") String keyword
+    );
     }
