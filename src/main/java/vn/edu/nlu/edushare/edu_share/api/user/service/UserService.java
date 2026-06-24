@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import vn.edu.nlu.edushare.edu_share.api.auth.service.JwtService;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
+import vn.edu.nlu.edushare.edu_share.api.user.request.UserProfileDetailRequest;
 import vn.edu.nlu.edushare.edu_share.api.user.request.UserRegistrationRequest;
 
 import java.util.*;
@@ -76,5 +77,30 @@ public class UserService {
     public User getCurrentUser(String token) {
         String email = jwtService.extractEmail(token);
         return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+    }
+
+    // Cập nhật thông tin cá nhân từ trang Profile Detail
+    public User updateProfileDetail(String id, UserProfileDetailRequest request) {
+        User user = getUserById(id);
+
+        // Kiểm tra nếu mã số sinh viên thay đổi thì mới check trùng
+        if (request.getStudentCode() != null && !request.getStudentCode().equals(user.getStudentCode())) {
+            if (userRepository.existsByStudentCode(request.getStudentCode())) {
+                throw new RuntimeException("Mã số sinh viên này đã được sử dụng bởi tài khoản khác!");
+            }
+            user.setStudentCode(request.getStudentCode());
+        }
+
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getAvatarUrl() != null) {
+            user.setAvatarUrl(request.getAvatarUrl());
+        }
+
+        return userRepository.save(user);
     }
 }

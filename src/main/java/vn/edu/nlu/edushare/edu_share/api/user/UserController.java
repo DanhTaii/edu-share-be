@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
+import vn.edu.nlu.edushare.edu_share.api.user.request.UserProfileDetailRequest;
 import vn.edu.nlu.edushare.edu_share.api.user.request.UserRegistrationRequest;
 import vn.edu.nlu.edushare.edu_share.api.user.service.UserService;
 
@@ -41,10 +42,14 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    // API Cập nhật profile
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProfile(@PathVariable String id, @RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(id, user));
+    public ResponseEntity<?> updateProfile(@PathVariable String id, @RequestBody UserProfileDetailRequest request) {
+        try {
+            User updatedUser = userService.updateProfileDetail(id, request);
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // API Xóa (Dùng khi user muốn hủy tài khoản)
