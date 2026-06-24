@@ -47,9 +47,51 @@ public class TransactionService {
         // 5. Lưu xuống DB và trả về kết quả
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // TODO: Chỗ này sau này bạn viết thêm hàm tạo Message tự động gửi vào phòng Chat của 2 người nhé!
 
         return savedTransaction;
+    }
+    @Transactional
+    public void acceptTransaction(Integer transactionId, String currentUserId) {
+        // 1. Tìm giao dịch trong DB
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch này!"));
+
+        // 2. Bảo mật: Chỉ NGƯỜI BÁN (Seller) mới được quyền duyệt/từ chối
+        if (!transaction.getSellerId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền duyệt giao dịch này!");
+        }
+
+        // 3. Kiểm tra trạng thái hiện tại (Chỉ duyệt đơn đang CHỜ XÁC NHẬN)
+        if (!"PENDING".equalsIgnoreCase(String.valueOf(transaction.getStatus()))) {
+            throw new RuntimeException("Chỉ có thể duyệt giao dịch đang ở trạng thái CHỜ XÁC NHẬN");
+        }
+
+        // 4. Cập nhật trạng thái thành ĐANG XỬ LÝ (hoặc SUCCESS tùy luồng nghiệp vụ của ông)
+        transaction.setStatus(Transaction.TransactionStatus.valueOf("IN-PROGRESS"));
+
+        // 5. Lưu vào DB
+        transactionRepository.save(transaction);
+    }
+    @Transactional
+    public void rejectTransaction(Integer transactionId, String currentUserId) {
+        // 1. Tìm giao dịch
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch này!"));
+
+        if (!transaction.getSellerId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền từ chối giao dịch này!");
+        }
+
+        // 3. Kiểm tra trạng thái
+        if (!"PENDING".equalsIgnoreCase(String.valueOf(transaction.getStatus()))) {
+            throw new RuntimeException("Chỉ có thể từ chối giao dịch đang ở trạng thái CHỜ XÁC NHẬN");
+        }
+
+        // 4. Cập nhật trạng thái thành TỪ CHỐI
+        transaction.setStatus(Transaction.TransactionStatus.valueOf("REJECTED"));
+
+        // 5. Lưu vào DB
+        transactionRepository.save(transaction);
     }
 }
 
