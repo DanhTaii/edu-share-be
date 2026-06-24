@@ -16,7 +16,7 @@ public class JwtService {
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
     public String generateToken(User user) {
-        return Jwts.builder().subject(user.getEmail()).issuedAt(new Date())
+        return Jwts.builder().subject(user.getEmail()).claim("userId", user.getId()).issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(key)
                 .compact();
@@ -40,5 +40,13 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+    public String extractUserId(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("userId", String.class); // Lấy đúng trường "userId" ra
     }
 }
