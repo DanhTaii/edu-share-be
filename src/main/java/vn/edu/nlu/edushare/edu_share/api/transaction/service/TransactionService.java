@@ -6,8 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.nlu.edushare.edu_share.api.article.model.Post;
 import vn.edu.nlu.edushare.edu_share.api.article.repository.PostRepository;
 import vn.edu.nlu.edushare.edu_share.api.transaction.dto.request.TransactionRequestDTO;
+import vn.edu.nlu.edushare.edu_share.api.transaction.dto.response.TransactionResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.transaction.model.Transaction;
 import vn.edu.nlu.edushare.edu_share.api.transaction.repository.TransactionRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -92,6 +96,30 @@ public class TransactionService {
 
         // 5. Lưu vào DB
         transactionRepository.save(transaction);
+    }
+    public List<TransactionResponseDTO> getTransactionHistory(String userId, String role, String status) {
+        List<Transaction> transactions = transactionRepository.findHistory(userId, role, status);
+        List<TransactionResponseDTO> dtoList = new ArrayList<>();
+
+        for (Transaction t : transactions) {
+            TransactionResponseDTO dto = new TransactionResponseDTO();
+            dto.setId(t.getId());
+            dto.setPostId(t.getPost().getId());
+            dto.setBuyerId(t.getBuyerId());
+            dto.setSellerId(t.getSellerId());
+            dto.setTransactionType(String.valueOf(t.getType()));
+            dto.setStatus(String.valueOf(t.getStatus()));
+
+            // Lấy thêm thông tin bài đăng để có Ảnh và Tiêu đề
+            Post post = postRepository.findById(t.getPost().getId()).orElse(null);
+            if (post != null) {
+                dto.setPostTitle(post.getTitle());
+                dto.setPostImage(post.getImageUrl()); // URL ảnh sản phẩm
+            }
+
+            dtoList.add(dto);
+        }
+        return dtoList;
     }
 }
 
