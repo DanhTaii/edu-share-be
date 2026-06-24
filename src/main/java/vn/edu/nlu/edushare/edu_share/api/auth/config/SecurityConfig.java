@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/ws-edushare/**").permitAll()
                         .requestMatchers("/posts/**").permitAll()
+                        .requestMatchers("/locations/**").permitAll()
                         .anyRequest()
                         .authenticated())
 
