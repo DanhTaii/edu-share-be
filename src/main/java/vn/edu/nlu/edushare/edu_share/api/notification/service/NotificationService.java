@@ -79,4 +79,13 @@ public class NotificationService {
         Pageable pageable = PageRequest.of(page, size);
         return notificationRepository.findNotificationsWithPostImage(userId, pageable);
     }
+
+    public void markAllAsRead(String userId) {
+        notificationRepository.markAllAsRead(userId);
+    }
+
+    public boolean checkUnreadNotification(String userId) {
+        return notificationRepository.existsByUserIdAndIsReadFalse(userId);
+    }
+
 }

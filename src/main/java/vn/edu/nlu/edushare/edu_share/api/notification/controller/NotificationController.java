@@ -39,4 +39,17 @@ public class NotificationController {
         return ResponseEntity.ok(notifications);
     }
 
+    @PutMapping("/mark-all-read")
+    public ResponseEntity<Void> markAllAsRead(@RequestParam String userId) {
+        notificationService.markAllAsRead(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/check-unread")
+    public ResponseEntity<Boolean> checkUnread(@RequestParam String userId) {
+        boolean hasUnread = notificationService.checkUnreadNotification(userId);
+        return ResponseEntity.ok(hasUnread);
+    }
+
+
 }
