@@ -52,4 +52,10 @@ public interface ConversationRepository extends JpaRepository<Conversation, Inte
     //
     //PostId: Lọc theo cột ID của bài đăng (Tương đương post_id = ?)
     Optional<Conversation> findByUserOneIdAndUserTwoIdAndPostId(String user1, String user2, int postId);
+
+    @Query("SELECT c.id " +
+            "FROM Conversation c " +
+            "WHERE (c.userOne.id = :senderId AND c.userTwo.id = :recipientId) " +
+            "OR (c.userOne.id = :recipientId AND c.userTwo.id = :senderId) AND c.postId = :postId")
+    Integer findConversationIdBetweenUsers(@Param("senderId") String senderId, @Param("recipientId") String recipientId, @Param("postId") int postId);
 }

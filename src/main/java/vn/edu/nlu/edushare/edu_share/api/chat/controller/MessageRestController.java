@@ -1,5 +1,6 @@
 package vn.edu.nlu.edushare.edu_share.api.chat.controller;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.List;
 public class MessageRestController {
 
     private final ChatService chatService;
+    private final ConversionService conversionService;
 
     @GetMapping
     public ResponseEntity<Page<ConversationResponseDto>> getUserConversations(
@@ -62,4 +64,20 @@ public class MessageRestController {
         MessageResponseDto response = chatService.createConversationAndSendFirstMessage(request);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/check-existing")
+    public ResponseEntity<Integer> checkExistingConversation(@RequestParam String senderId, @RequestParam String recipientId, @RequestParam int postId) {
+        // Gọi Repository để tìm ID phòng
+        Integer conversationId = chatService.getConversationIdBetweenUsers(senderId, recipientId, postId);
+        System.out.println( "CONVERSATION ID : ========" + conversationId);
+
+        // Nếu không tìm thấy, trả về -1 (để Mobile hiểu là phòng ảo/chưa có)
+        if (conversationId == null) {
+            return ResponseEntity.ok(-1);
+        }
+
+        // Nếu có, trả về ID thật
+        return ResponseEntity.ok(conversationId);
+    }
+
 }
