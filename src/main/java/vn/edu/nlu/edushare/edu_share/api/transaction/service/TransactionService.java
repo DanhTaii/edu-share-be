@@ -6,8 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.edu.nlu.edushare.edu_share.api.article.model.Post;
 import vn.edu.nlu.edushare.edu_share.api.article.repository.PostRepository;
 import vn.edu.nlu.edushare.edu_share.api.transaction.dto.request.TransactionRequestDTO;
+import vn.edu.nlu.edushare.edu_share.api.transaction.dto.response.TransactionResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.transaction.model.Transaction;
 import vn.edu.nlu.edushare.edu_share.api.transaction.repository.TransactionRepository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -47,9 +51,83 @@ public class TransactionService {
         // 5. Lưu xuống DB và trả về kết quả
         Transaction savedTransaction = transactionRepository.save(transaction);
 
-        // TODO: Chỗ này sau này bạn viết thêm hàm tạo Message tự động gửi vào phòng Chat của 2 người nhé!
 
         return savedTransaction;
     }
+
+    public List<TransactionResponseDTO> getTransactionHistory(String userId, String role, String status) {
+        List<Transaction.TransactionStatus> statusList = new ArrayList<>();
+        if (status != null && !status.isEmpty()) {
+            String[] statusArray = status.split(",");
+            for (String s : statusArray) {
+                statusList.add(Transaction.TransactionStatus.valueOf(s.trim().toUpperCase()));
+            }
+        }
+
+        List<Transaction> transactions = transactionRepository.findHistory(userId, role, statusList);
+
+        List<TransactionResponseDTO> dtoList = new ArrayList<>();
+        for (Transaction t : transactions) {
+            TransactionResponseDTO dto = new TransactionResponseDTO();
+            dto.setId(t.getId());
+            dto.setPostId(t.getPost().getId());
+            dto.setBuyerId(t.getBuyerId());
+            dto.setSellerId(t.getSellerId());
+            dto.setTransactionType(String.valueOf(t.getType()));
+            dto.setStatus(String.valueOf(t.getStatus()));
+
+            Post post = postRepository.findById(t.getPost().getId()).orElse(null);
+            if (post != null) {
+                dto.setPostTitle(post.getTitle());
+                dto.setPostImage(post.getImageUrl());
+            }
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+    @Transactional
+    public void acceptTransaction(Integer transactionId, String currentUserId) {
+        // 1. Tìm giao dịch trong DB
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch này!"));
+
+        // 2. Bảo mật: Chỉ NGƯỜI BÁN (Seller) mới được quyền duyệt/từ chối
+        if (!transaction.getSellerId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền duyệt giao dịch này!");
+        }
+
+        // 3. Kiểm tra trạng thái hiện tại (Chỉ duyệt đơn đang CHỜ XÁC NHẬN)
+        if (!"PENDING".equalsIgnoreCase(String.valueOf(transaction.getStatus()))) {
+            throw new RuntimeException("Chỉ có thể duyệt giao dịch đang ở trạng thái CHỜ XÁC NHẬN");
+        }
+
+        // 4. Cập nhật trạng thái thành ĐANG XỬ LÝ (hoặc SUCCESS tùy luồng nghiệp vụ của ông)
+        transaction.setStatus(Transaction.TransactionStatus.IN_PROGRESS);
+
+        // 5. Lưu vào DB
+        transactionRepository.save(transaction);
+    }
+    @Transactional
+    public void rejectTransaction(Integer transactionId, String currentUserId) {
+        // 1. Tìm giao dịch
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch này!"));
+
+        if (!transaction.getSellerId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền từ chối giao dịch này!");
+        }
+
+        // 3. Kiểm tra trạng thái
+        if (!"PENDING".equalsIgnoreCase(String.valueOf(transaction.getStatus()))) {
+            throw new RuntimeException("Chỉ có thể từ chối giao dịch đang ở trạng thái CHỜ XÁC NHẬN");
+        }
+
+        // 4. Cập nhật trạng thái thành TỪ CHỐI
+        transaction.setStatus(Transaction.TransactionStatus.REJECTED);
+
+        // 5. Lưu vào DB
+        transactionRepository.save(transaction);
+    }
+
 }
 
