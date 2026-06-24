@@ -77,4 +77,16 @@ public class TransactionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<?> completeTransaction(
+            @PathVariable Integer id,
+            Authentication authentication) {
+        try {
+            String userId = (String) authentication.getCredentials();
+            transactionService.completeTransaction(id, userId);
+            return ResponseEntity.ok().body("Xác nhận hoàn thành giao dịch thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

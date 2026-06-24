@@ -128,6 +128,27 @@ public class TransactionService {
         // 5. Lưu vào DB
         transactionRepository.save(transaction);
     }
+    @Transactional
+    public void completeTransaction(Integer transactionId, String currentUserId) {
+        // 1. Tìm giao dịch
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch này!"));
 
+        // 2. Bảo mật: Chỉ NGƯỜI MUA (Buyer) mới có quyền xác nhận đã nhận hàng!
+        if (!transaction.getBuyerId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền xác nhận hoàn thành giao dịch này!");
+        }
+
+        // 3. Kiểm tra trạng thái: Chỉ cho phép hoàn thành khi đơn đang ở trạng thái ĐANG XỬ LÝ
+        if (!Transaction.TransactionStatus.IN_PROGRESS.equals(transaction.getStatus())) {
+            throw new RuntimeException("Chỉ có thể hoàn thành giao dịch đang ở trạng thái ĐANG XỬ LÝ");
+        }
+
+        // 4. Cập nhật trạng thái thành THÀNH CÔNG (SUCCESS)
+        transaction.setStatus(Transaction.TransactionStatus.SUCCESS);
+
+        // 5. Lưu vào DB
+        transactionRepository.save(transaction);
+    }
 }
 
