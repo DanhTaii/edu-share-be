@@ -194,4 +194,9 @@ public class ChatService {
 
         return responseDto;
     }
+
+    public Integer getConversationIdBetweenUsers(String senderId, String recipientId, int postId) {
+        return conversationRepository.findConversationIdBetweenUsers(senderId, recipientId, postId);
+    }
+
 }
