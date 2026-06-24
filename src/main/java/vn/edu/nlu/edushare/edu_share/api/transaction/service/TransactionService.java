@@ -1,0 +1,55 @@
+package vn.edu.nlu.edushare.edu_share.api.transaction.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import vn.edu.nlu.edushare.edu_share.api.article.model.Post;
+import vn.edu.nlu.edushare.edu_share.api.article.repository.PostRepository;
+import vn.edu.nlu.edushare.edu_share.api.transaction.dto.request.TransactionRequestDTO;
+import vn.edu.nlu.edushare.edu_share.api.transaction.model.Transaction;
+import vn.edu.nlu.edushare.edu_share.api.transaction.repository.TransactionRepository;
+
+@Service
+@RequiredArgsConstructor
+public class TransactionService {
+    private final TransactionRepository transactionRepository;
+    private final PostRepository postRepository; // Dùng để tìm kiếm thông tin bài đăng lấy sellerId
+
+    @Transactional
+    public Transaction createTransactionRequest(TransactionRequestDTO request, String currentUserId) {
+
+        // 1. Tìm kiếm bài đăng xem có tồn tại không
+        Post post = postRepository.findById(request.getPostId())
+                .orElseThrow(() -> new RuntimeException("Bài đăng không tồn tại hoặc đã bị xóa!"));
+
+        // 2. Bảo mật: Không cho phép tự tạo giao dịch với bài đăng của chính mình
+        if (post.getAuthor().getId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không thể tự yêu cầu giao dịch trên bài đăng của chính mình!");
+        }
+
+        // 3. Kiểm tra xem người dùng đã gửi yêu cầu trùng lặp trước đó chưa (Tránh spam click nút)
+        boolean isAlreadyPending = transactionRepository.existsByPostIdAndBuyerIdAndStatus(
+                post.getId(), currentUserId, Transaction.TransactionStatus.PENDING
+        );
+        if (isAlreadyPending) {
+            throw new RuntimeException("Yêu cầu giao dịch của bạn cho sản phẩm này đang chờ duyệt, không thể gửi thêm!");
+        }
+
+        // 4. Khởi tạo đối tượng Transaction và ánh xạ dữ liệu
+        Transaction transaction = Transaction.builder()
+                .post(post) // Liên kết thực thể Post
+                .sellerId(post.getAuthor().getId()) // Lấy ID của chủ bài đăng làm sellerId
+                .buyerId(currentUserId)             // Người đăng nhập hiện tại là buyerId
+                .type(Transaction.TransactionType.valueOf(post.getTransactionType().name())) // Loại giao dịch ăn theo bài đăng
+                .status(Transaction.TransactionStatus.PENDING)  // Mặc định ban đầu luôn là PENDING
+                .build();
+
+        // 5. Lưu xuống DB và trả về kết quả
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        // TODO: Chỗ này sau này bạn viết thêm hàm tạo Message tự động gửi vào phòng Chat của 2 người nhé!
+
+        return savedTransaction;
+    }
+}
+
