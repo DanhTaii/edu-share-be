@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostListItemResponseDto;
+import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostMapResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostSummaryResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.service.PostService;
 
@@ -33,6 +34,14 @@ public class PostController {
     @GetMapping("/detail")
     public ResponseEntity<PostDetailResponseDTO> getDetailPost(@RequestParam Integer postId) {
         return ResponseEntity.ok(postService.getDetailPost(postId));
+    }
+    //
+    @GetMapping("/map")
+    public ResponseEntity<List<PostMapResponseDto>> getPostsForMap(
+            @RequestParam(required = false) String area,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(postService.getPostsForMap(area, keyword));
     }
 
 }
