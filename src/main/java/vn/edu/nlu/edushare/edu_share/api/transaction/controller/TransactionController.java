@@ -1,4 +1,5 @@
 package vn.edu.nlu.edushare.edu_share.api.transaction.controller;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -8,6 +9,7 @@ import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostListItemRespon
 import vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostSummaryResponseDto;
 import vn.edu.nlu.edushare.edu_share.api.article.service.PostService;
 import vn.edu.nlu.edushare.edu_share.api.transaction.dto.request.TransactionRequestDTO;
+import vn.edu.nlu.edushare.edu_share.api.transaction.dto.response.TransactionResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.transaction.model.Transaction;
 import vn.edu.nlu.edushare.edu_share.api.transaction.service.TransactionService;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
@@ -20,7 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TransactionController {
     private final TransactionService transactionService;
-private final UserService userService;
+    private final UserService userService;
+
     @PostMapping("/request")
     public ResponseEntity<?> requestTransaction(
             @RequestBody TransactionRequestDTO requestDTO,
@@ -34,5 +37,17 @@ private final UserService userService;
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<TransactionResponseDTO>> getHistory(
+            @RequestParam String role,
+            @RequestParam String status,
+            Authentication authentication) {
+
+        String currentUserId = (String) authentication.getCredentials();
+
+        List<TransactionResponseDTO> history = transactionService.getTransactionHistory(currentUserId, role, status);
+        return ResponseEntity.ok(history);
     }
 }

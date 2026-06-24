@@ -13,4 +13,15 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
     boolean existsByPostIdAndBuyerIdAndStatus(Integer postId, String buyerId, Transaction.TransactionStatus status);
+    @Query("SELECT t FROM Transaction t WHERE " +
+            "((:role = 'BUYER' AND t.buyerId = :userId) OR (:role = 'SELLER' AND t.sellerId = :userId)) " +
+            "AND (" +
+            "    (:tab = 'PENDING' AND t.status = 'pending') OR " +
+            "    (:tab = 'ACCEPTED' AND t.status IN ('in-progress', 'success')) OR " +
+            "    (:tab = 'REJECTED' AND t.status IN ('rejected', 'cancel'))" +
+            ") " +
+            "ORDER BY t.id DESC")
+    List<Transaction> findHistory(@Param("userId") String userId,
+                                  @Param("role") String role,
+                                  @Param("tab") String tab);
     }
