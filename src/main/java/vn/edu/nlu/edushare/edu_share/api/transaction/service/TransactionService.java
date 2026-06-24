@@ -54,6 +54,37 @@ public class TransactionService {
 
         return savedTransaction;
     }
+
+    public List<TransactionResponseDTO> getTransactionHistory(String userId, String role, String status) {
+        List<Transaction.TransactionStatus> statusList = new ArrayList<>();
+        if (status != null && !status.isEmpty()) {
+            String[] statusArray = status.split(",");
+            for (String s : statusArray) {
+                statusList.add(Transaction.TransactionStatus.valueOf(s.trim().toUpperCase()));
+            }
+        }
+
+        List<Transaction> transactions = transactionRepository.findHistory(userId, role, statusList);
+
+        List<TransactionResponseDTO> dtoList = new ArrayList<>();
+        for (Transaction t : transactions) {
+            TransactionResponseDTO dto = new TransactionResponseDTO();
+            dto.setId(t.getId());
+            dto.setPostId(t.getPost().getId());
+            dto.setBuyerId(t.getBuyerId());
+            dto.setSellerId(t.getSellerId());
+            dto.setTransactionType(String.valueOf(t.getType()));
+            dto.setStatus(String.valueOf(t.getStatus()));
+
+            Post post = postRepository.findById(t.getPost().getId()).orElse(null);
+            if (post != null) {
+                dto.setPostTitle(post.getTitle());
+                dto.setPostImage(post.getImageUrl());
+            }
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
     @Transactional
     public void acceptTransaction(Integer transactionId, String currentUserId) {
         // 1. Tìm giao dịch trong DB
@@ -71,7 +102,7 @@ public class TransactionService {
         }
 
         // 4. Cập nhật trạng thái thành ĐANG XỬ LÝ (hoặc SUCCESS tùy luồng nghiệp vụ của ông)
-        transaction.setStatus(Transaction.TransactionStatus.valueOf("IN-PROGRESS"));
+        transaction.setStatus(Transaction.TransactionStatus.IN_PROGRESS);
 
         // 5. Lưu vào DB
         transactionRepository.save(transaction);
@@ -92,34 +123,11 @@ public class TransactionService {
         }
 
         // 4. Cập nhật trạng thái thành TỪ CHỐI
-        transaction.setStatus(Transaction.TransactionStatus.valueOf("REJECTED"));
+        transaction.setStatus(Transaction.TransactionStatus.REJECTED);
 
         // 5. Lưu vào DB
         transactionRepository.save(transaction);
     }
-    public List<TransactionResponseDTO> getTransactionHistory(String userId, String role, String status) {
-        List<Transaction> transactions = transactionRepository.findHistory(userId, role, status);
-        List<TransactionResponseDTO> dtoList = new ArrayList<>();
 
-        for (Transaction t : transactions) {
-            TransactionResponseDTO dto = new TransactionResponseDTO();
-            dto.setId(t.getId());
-            dto.setPostId(t.getPost().getId());
-            dto.setBuyerId(t.getBuyerId());
-            dto.setSellerId(t.getSellerId());
-            dto.setTransactionType(String.valueOf(t.getType()));
-            dto.setStatus(String.valueOf(t.getStatus()));
-
-            // Lấy thêm thông tin bài đăng để có Ảnh và Tiêu đề
-            Post post = postRepository.findById(t.getPost().getId()).orElse(null);
-            if (post != null) {
-                dto.setPostTitle(post.getTitle());
-                dto.setPostImage(post.getImageUrl()); // URL ảnh sản phẩm
-            }
-
-            dtoList.add(dto);
-        }
-        return dtoList;
-    }
 }
 
