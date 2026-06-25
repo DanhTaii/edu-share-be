@@ -18,4 +18,9 @@ public class TransactionResponseDTO {
     private String sellerId;
     private String transactionType; // SALE, EXCHANGE, FREE
     private String status;
+    private Double price;
+    private String buyerName;
+    private String buyerAvatar;
+    private String sellerName;
+    private String sellerAvatar;
 }
