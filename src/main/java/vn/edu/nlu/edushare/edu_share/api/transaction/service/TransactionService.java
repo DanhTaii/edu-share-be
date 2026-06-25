@@ -150,5 +150,28 @@ public class TransactionService {
         // 5. Lưu vào DB
         transactionRepository.save(transaction);
     }
+    @Transactional
+    public void cancelTransaction(Integer transactionId, String currentUserId) {
+        // 1. Tìm giao dịch
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch này!"));
+
+        // 2. Bảo mật: Phải là NGƯỜI MUA hoặc NGƯỜI BÁN tham gia vào đơn này mới có quyền hủy
+        if (!transaction.getBuyerId().equals(currentUserId) && !transaction.getSellerId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền hủy giao dịch này!");
+        }
+
+        // 3. Kiểm tra trạng thái: Chỉ cho phép hủy khi đơn đang PENDING hoặc IN_PROGRESS
+        if (!Transaction.TransactionStatus.PENDING.equals(transaction.getStatus()) &&
+                !Transaction.TransactionStatus.IN_PROGRESS.equals(transaction.getStatus())) {
+            throw new RuntimeException("Chỉ có thể hủy giao dịch đang ở trạng thái CHỜ XÁC NHẬN hoặc ĐANG XỬ LÝ!");
+        }
+
+        // 4. Cập nhật trạng thái thành ĐÃ HỦY (CANCELED)
+        transaction.setStatus(Transaction.TransactionStatus.CANCELED);
+
+        // 5. Lưu vào DB
+        transactionRepository.save(transaction);
+    }
 }
 

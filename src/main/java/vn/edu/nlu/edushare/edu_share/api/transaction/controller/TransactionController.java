@@ -89,4 +89,16 @@ public class TransactionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelTransaction(
+            @PathVariable Integer id,
+            Authentication authentication) {
+        try {
+            String userId = (String) authentication.getCredentials();
+            transactionService.cancelTransaction(id, userId);
+            return ResponseEntity.ok().body("Hủy giao dịch thành công!");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
