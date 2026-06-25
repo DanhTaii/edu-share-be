@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import vn.edu.nlu.edushare.edu_share.api.auth.service.JwtService;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
-import vn.edu.nlu.edushare.edu_share.api.user.request.UserProfileDetailRequest;
-import vn.edu.nlu.edushare.edu_share.api.user.request.UserRegistrationRequest;
+import vn.edu.nlu.edushare.edu_share.api.user.dto.request.UserProfileDetailRequest;
+import vn.edu.nlu.edushare.edu_share.api.user.dto.request.UserRegistrationRequest;
 
 import java.util.*;
 

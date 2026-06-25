@@ -11,7 +11,7 @@ import vn.edu.nlu.edushare.edu_share.api.mail.model.EmailVerification;
 import vn.edu.nlu.edushare.edu_share.api.mail.repository.EmailVerificationRepository;
 import vn.edu.nlu.edushare.edu_share.api.mail.request.SendOtpRequest;
 import vn.edu.nlu.edushare.edu_share.api.mail.service.EmailService;
-import vn.edu.nlu.edushare.edu_share.api.mail.util.OtpGenerator;
+import vn.edu.nlu.edushare.edu_share.common.utils.OtpGenerator;
 import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
 

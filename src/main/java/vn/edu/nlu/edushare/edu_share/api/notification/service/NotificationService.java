@@ -10,7 +10,7 @@ import vn.edu.nlu.edushare.edu_share.api.notification.model.Notification;
 import vn.edu.nlu.edushare.edu_share.api.notification.repository.NotificationRepository;
 import vn.edu.nlu.edushare.edu_share.api.user_fcm_token.model.UserFcmToken;
 import vn.edu.nlu.edushare.edu_share.api.user_fcm_token.repository.UserFcmTokenRepository;
-import vn.edu.nlu.edushare.edu_share.infrastructure.firebase.service.FcmService;
+import vn.edu.nlu.edushare.edu_share.common.infrastructure.firebase.service.FcmService;
 
 import java.util.HashMap;
 import java.util.List;
