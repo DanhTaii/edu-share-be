@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.nlu.edushare.edu_share.api.article.model.Post;
 import vn.edu.nlu.edushare.edu_share.api.article.repository.PostRepository;
+import vn.edu.nlu.edushare.edu_share.api.notification.service.NotificationService;
 import vn.edu.nlu.edushare.edu_share.api.transaction.dto.request.TransactionRequestDTO;
 import vn.edu.nlu.edushare.edu_share.api.transaction.dto.response.TransactionResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.transaction.model.Transaction;
@@ -21,6 +22,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // Hàm helper tìm Transaction theo ID dùng chung
     private Transaction findTransactionById(Integer id) {
@@ -56,7 +58,16 @@ public class TransactionService {
                 .status(Transaction.TransactionStatus.PENDING)
                 .build();
 
-        return transactionRepository.save(transaction);
+        Transaction transaction1 = transactionRepository.save(transaction);
+
+        notificationService.sendTransactionNotification(
+                post.getAuthor().getId(),
+                "Yêu cầu giao dịch mới \uD83D\uDCE6",
+                buyer.getFullName() + " muốn giao dịch sản phẩm: " + post.getTitle(),
+                post.getId()
+        );
+
+        return transaction1;
     }
 
     public List<TransactionResponseDTO> getTransactionHistory(String userId, String role, String status) {
@@ -124,6 +135,13 @@ public class TransactionService {
         }
 
         transactionRepository.save(transaction);
+
+        notificationService.sendTransactionNotification(
+                transaction.getBuyer().getId(),
+                "Giao dịch được chấp nhận \uD83C\uDF89",
+                transaction.getSeller().getFullName() + " đã đồng ý giao dịch sản phẩm: " + post.getTitle(),
+                post.getId()
+        );
     }
 
     @Transactional
@@ -147,6 +165,14 @@ public class TransactionService {
         }
 
         transactionRepository.save(transaction);
+
+        notificationService.sendTransactionNotification(
+                transaction.getBuyer().getId(),
+                "Giao dịch bị từ chối \uD83D\uDEAB",
+                transaction.getSeller().getFullName() + " đã từ chối giao dịch sản phẩm: " + post.getTitle(),
+                post.getId()
+        );
+
     }
 
     @Transactional
@@ -169,6 +195,13 @@ public class TransactionService {
         }
 
         transactionRepository.save(transaction);
+
+        notificationService.sendTransactionNotification(
+                transaction.getSeller().getId(),
+                "Giao dịch hoàn tất \uD83E\uDD1D",
+                transaction.getBuyer().getFullName() + " đã xác nhận nhận được sản phẩm: " + post.getTitle(),
+                post.getId()
+        );
     }
 
     @Transactional
@@ -192,5 +225,23 @@ public class TransactionService {
         }
 
         transactionRepository.save(transaction);
+        // Kiểm tra ai là người hủy để báo cho người còn lại
+        if (transaction.getBuyer().getId().equals(currentUserId)) {
+            // Nếu người mua hủy -> Báo cho Người Bán
+            notificationService.sendTransactionNotification(
+                    transaction.getSeller().getId(),
+                    "Giao dịch bị hủy \uD83D\uDC94",
+                    transaction.getBuyer().getFullName() + " đã hủy giao dịch sản phẩm: " + post.getTitle(),
+                    post.getId()
+            );
+        } else {
+            // Nếu Nguười Bán hủy -> Báo cho Người Mua
+            notificationService.sendTransactionNotification(
+                    transaction.getBuyer().getId(),
+                    "Giao dịch bị hủy \uD83D\uDC94",
+                    transaction.getSeller().getFullName() + " đã hủy giao dịch sản phẩm: " + post.getTitle(),
+                    post.getId()
+            );
+        }
     }
 }
