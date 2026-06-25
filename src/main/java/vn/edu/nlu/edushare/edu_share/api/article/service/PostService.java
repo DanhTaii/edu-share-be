@@ -39,6 +39,10 @@ public class PostService {
                 .map(this::toPostListItemResponseDto);
     }
 
+    public Page<PostListItemResponseDto> getMyPosts(Pageable pageable, String authorId) {
+        return postRepository.findPostListByAuthorId(authorId, pageable)
+                .map(this::toPostListItemResponseDto);
+    }
     private PostListItemResponseDto toPostListItemResponseDto(PostListItemProjection p) {
         return PostListItemResponseDto.builder()
                 .id(p.getId())

@@ -65,6 +65,39 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     );
 
     @Query(value = """
+        SELECT
+            p.id AS id,
+            p.title AS title,
+            p.description AS description,
+            p.price AS price,
+            p.image_url AS imageUrl,
+            p.status AS status,
+            p.category_id AS categoryId,
+            c.name AS categoryName,
+            p.location_id AS locationId,
+            l.area_name AS locationName,
+            p.author_id AS authorId,
+            u.full_name AS authorName
+        FROM posts p
+        LEFT JOIN categories c ON c.id = p.category_id
+        LEFT JOIN locations l ON l.id = p.location_id
+        LEFT JOIN users u ON u.id = p.author_id
+        WHERE p.author_id = :authorId
+          AND (p.status IS NULL OR p.status <> 'HIDDEN')
+        ORDER BY p.created_at DESC, p.id DESC
+        """,
+            countQuery = """
+        SELECT COUNT(*)
+        FROM posts p
+        WHERE p.author_id = :authorId
+          AND (p.status IS NULL OR p.status <> 'HIDDEN')
+        """,
+            nativeQuery = true)
+    Page<PostListItemProjection> findPostListByAuthorId(
+            @Param("authorId") String authorId,
+            Pageable pageable
+    );
+    @Query(value = """
     SELECT new vn.edu.nlu.edushare.edu_share.api.article.dto.response.PostDetailResponseDTO(
         p.id, p.title, p.description, p.price, p.imageUrl, p.status, p.transactionType,
         c.id, c.name, 
