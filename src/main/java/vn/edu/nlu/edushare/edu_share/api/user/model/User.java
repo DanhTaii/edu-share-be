@@ -39,6 +39,7 @@ public class User {
     @JsonIgnore
     private String password;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "ENUM('STUDENT', 'ADMIN')")
     private Role role = Role.STUDENT;
@@ -46,6 +47,7 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Builder.Default
     @Column(name = "is_verified")
     private boolean isVerified = false;
 
