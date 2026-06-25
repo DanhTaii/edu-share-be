@@ -35,6 +35,23 @@ public class PostController {
         return postService.getPosts(PageRequest.of(page, size), category, keyword);
     }
 
+    @GetMapping("/me")
+    public Page<PostListItemResponseDto> getMyPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size,
+            Authentication authentication
+    ) {
+        String currentUserId = (String) authentication.getCredentials();
+        return postService.getMyPosts(PageRequest.of(page, size), currentUserId);
+    }
+    @GetMapping("/user/{authorId}")
+    public Page<PostListItemResponseDto> getPostsByAuthorId(
+            @PathVariable String authorId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size
+    ) {
+        return postService.getMyPosts(PageRequest.of(page, size), authorId);
+    }
     @PostMapping
     public ResponseEntity<?> createPost(
             @Valid @RequestBody CreatePostRequestDto request,

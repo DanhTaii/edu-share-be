@@ -68,9 +68,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private boolean isPublicRequest(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/api/auth/")
-                || path.startsWith("/ws-edushare/")
-                || (HttpMethod.GET.matches(request.getMethod())
-                && path.startsWith("/posts"));
+        if (path.startsWith("/api/auth/") || path.startsWith("/ws-edushare/")) {
+            return true;
+        }
+
+        if (!HttpMethod.GET.matches(request.getMethod())) {
+            return false;
+        }
+
+        return path.equals("/posts")
+                || path.equals("/posts/detail")
+                || path.equals("/posts/map")
+                || path.matches("/posts/user/[^/]+")
+                || path.matches("/posts/\\d+/summary");
     }
 }

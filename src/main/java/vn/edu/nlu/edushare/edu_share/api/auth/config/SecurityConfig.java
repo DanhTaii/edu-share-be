@@ -34,7 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/ws-edushare/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/posts", "/posts/detail", "/posts/map", "/posts/user/*", "/posts/*/summary").permitAll()
                         .requestMatchers("/locations/**").permitAll()
                         .anyRequest()
                         .authenticated())
