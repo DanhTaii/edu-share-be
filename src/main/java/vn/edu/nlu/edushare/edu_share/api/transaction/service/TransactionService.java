@@ -19,7 +19,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final PostRepository postRepository;
 
-
+    // Hàm helper tìm Transaction theo ID dùng chung
     private Transaction findTransactionById(Integer id) {
         return transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giao dịch này!"));
@@ -51,7 +51,6 @@ public class TransactionService {
 
         return transactionRepository.save(transaction);
     }
-
 
     public List<TransactionResponseDTO> getTransactionHistory(String userId, String role, String status) {
         List<Transaction.TransactionStatus> statusList = new ArrayList<>();
@@ -85,9 +84,10 @@ public class TransactionService {
     }
 
 
+
     @Transactional
     public void acceptTransaction(Integer transactionId, String currentUserId) {
-        Transaction transaction = findTransactionById(transactionId); // Dùng hàm helper
+        Transaction transaction = findTransactionById(transactionId);
 
         if (!transaction.getSellerId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền duyệt giao dịch này!");
@@ -97,12 +97,20 @@ public class TransactionService {
         }
 
         transaction.setStatus(Transaction.TransactionStatus.IN_PROGRESS);
+
+        // Cập nhật trạng thái bài đăng sang HIDDEN (Ẩn khỏi trang chủ)
+        Post post = transaction.getPost();
+        if (post != null) {
+            post.setStatus(Post.Status.HIDDEN);
+            postRepository.save(post);
+        }
+
         transactionRepository.save(transaction);
     }
 
     @Transactional
     public void rejectTransaction(Integer transactionId, String currentUserId) {
-        Transaction transaction = findTransactionById(transactionId); // Dùng hàm helper
+        Transaction transaction = findTransactionById(transactionId);
 
         if (!transaction.getSellerId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền từ chối giao dịch này!");
@@ -112,12 +120,20 @@ public class TransactionService {
         }
 
         transaction.setStatus(Transaction.TransactionStatus.REJECTED);
+
+        // Từ chối đơn thì trả trạng thái bài đăng về AVAILABLE (Hiện lại lên chợ)
+        Post post = transaction.getPost();
+        if (post != null) {
+            post.setStatus(Post.Status.AVAILABLE);
+            postRepository.save(post);
+        }
+
         transactionRepository.save(transaction);
     }
 
     @Transactional
     public void completeTransaction(Integer transactionId, String currentUserId) {
-        Transaction transaction = findTransactionById(transactionId); // Dùng hàm helper
+        Transaction transaction = findTransactionById(transactionId);
 
         if (!transaction.getBuyerId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền xác nhận hoàn thành giao dịch này!");
@@ -127,12 +143,20 @@ public class TransactionService {
         }
 
         transaction.setStatus(Transaction.TransactionStatus.SUCCESS);
+
+        // Xác nhận nhận hàng thành công -> Cập nhật bài đăng sang SOLD (Đã bán)
+        Post post = transaction.getPost();
+        if (post != null) {
+            post.setStatus(Post.Status.SOLD);
+            postRepository.save(post);
+        }
+
         transactionRepository.save(transaction);
     }
 
     @Transactional
     public void cancelTransaction(Integer transactionId, String currentUserId) {
-        Transaction transaction = findTransactionById(transactionId); // Dùng hàm helper
+        Transaction transaction = findTransactionById(transactionId);
 
         if (!transaction.getBuyerId().equals(currentUserId) && !transaction.getSellerId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền hủy giao dịch này!");
@@ -143,6 +167,14 @@ public class TransactionService {
         }
 
         transaction.setStatus(Transaction.TransactionStatus.CANCELED);
+
+        // Hủy đơn giữa chừng -> Trả trạng thái bài đăng về AVAILABLE để người khác mua
+        Post post = transaction.getPost();
+        if (post != null) {
+            post.setStatus(Post.Status.AVAILABLE);
+            postRepository.save(post);
+        }
+
         transactionRepository.save(transaction);
     }
 }
