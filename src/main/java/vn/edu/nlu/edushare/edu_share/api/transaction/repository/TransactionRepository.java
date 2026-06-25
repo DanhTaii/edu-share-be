@@ -15,8 +15,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     boolean existsByPostIdAndBuyerIdAndStatus(Integer postId, String buyerId, Transaction.TransactionStatus status);
 
     @Query("SELECT t FROM Transaction t WHERE " +
-            "(:role = 'BUYER' AND t.buyerId = :userId AND t.status IN :statuses) OR " +
-            "(:role = 'SELLER' AND t.sellerId = :userId AND t.status IN :statuses) " +
+            "(:role = 'BUYER' AND t.buyer.id = :userId AND t.status IN :statuses) OR " +
+            "(:role = 'SELLER' AND t.seller.id = :userId AND t.status IN :statuses) " +
             "ORDER BY t.createdAt DESC")
     List<Transaction> findHistory(
             @Param("userId") String userId,
