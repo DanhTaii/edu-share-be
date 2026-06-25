@@ -1,7 +1,8 @@
 package vn.edu.nlu.edushare.edu_share.api.article.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -31,11 +32,28 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
 
-    public List<PostListItemResponseDto> getPosts() {
-        return postRepository.findVisiblePostList()
-                .stream()
-                .map(this::toPostListItem)
-                .toList();
+    public Page<PostListItemResponseDto> getPosts(Pageable pageable, String category, String keyword) {
+        String categoryFilter = normalizeFilter(category);
+        String keywordFilter = normalizeFilter(keyword);
+        return postRepository.findVisiblePostList(categoryFilter, keywordFilter, pageable)
+                .map(this::toPostListItemResponseDto);
+    }
+
+    private PostListItemResponseDto toPostListItemResponseDto(PostListItemProjection p) {
+        return PostListItemResponseDto.builder()
+                .id(p.getId())
+                .title(p.getTitle())
+                .description(p.getDescription())
+                .price(p.getPrice())
+                .imageUrl(p.getImageUrl())
+                .status(p.getStatus())
+                .categoryId(p.getCategoryId())
+                .categoryName(p.getCategoryName())
+                .locationId(p.getLocationId())
+                .locationName(p.getLocationName())
+                .authorId(p.getAuthorId())
+                .authorName(p.getAuthorName())
+                .build();
     }
 
     public PostDetailResponseDTO getDetailPost(Integer postId) {
@@ -212,6 +230,13 @@ public class PostService {
         return value == null ? null : value.trim();
     }
 
+    private String normalizeFilter(String value) {
+        String normalized = normalize(value);
+        if (!StringUtils.hasText(normalized) || "All".equalsIgnoreCase(normalized)) {
+            return null;
+        }
+        return normalized;
+    }
     private String blankToNull(String value) {
         String normalized = normalize(value);
         return StringUtils.hasText(normalized) ? normalized : null;
