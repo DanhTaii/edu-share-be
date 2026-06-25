@@ -9,6 +9,7 @@ import vn.edu.nlu.edushare.edu_share.api.transaction.dto.request.TransactionRequ
 import vn.edu.nlu.edushare.edu_share.api.transaction.dto.response.TransactionResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.transaction.model.Transaction;
 import vn.edu.nlu.edushare.edu_share.api.transaction.repository.TransactionRepository;
+import vn.edu.nlu.edushare.edu_share.api.user.model.User;
 import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -43,10 +44,14 @@ public class TransactionService {
             throw new RuntimeException("Yêu cầu giao dịch của bạn cho sản phẩm này đang chờ duyệt, không thể gửi thêm!");
         }
 
+        // TÌM USER MUA HÀNG TỪ DATABASE
+        User buyer = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin người mua!"));
+
         Transaction transaction = Transaction.builder()
                 .post(post)
-                .sellerId(post.getAuthor().getId())
-                .buyerId(currentUserId)
+                .seller(post.getAuthor()) // Gắn Object Seller
+                .buyer(buyer)             // Gắn Object Buyer
                 .type(Transaction.TransactionType.valueOf(post.getTransactionType().name()))
                 .status(Transaction.TransactionStatus.PENDING)
                 .build();
@@ -70,8 +75,8 @@ public class TransactionService {
             TransactionResponseDTO dto = new TransactionResponseDTO();
             dto.setId(t.getId());
             dto.setPostId(t.getPost().getId());
-            dto.setBuyerId(t.getBuyerId());
-            dto.setSellerId(t.getSellerId());
+            dto.setBuyerId(t.getBuyer().getId());
+            dto.setSellerId(t.getSeller().getId());
             dto.setTransactionType(String.valueOf(t.getType()));
             dto.setStatus(String.valueOf(t.getStatus()));
 
@@ -81,18 +86,16 @@ public class TransactionService {
                 dto.setPostImage(post.getImageUrl());
                 dto.setPrice(post.getPrice());
             }
-            if (t.getBuyerId() != null) {
-                userRepository.findById(t.getBuyerId()).ifPresent(buyer -> {
-                    dto.setBuyerName(buyer.getFullName());
-                    dto.setBuyerAvatar(buyer.getAvatarUrl());
-                });
+            User buyer = t.getBuyer();
+            if (buyer != null) {
+                dto.setBuyerName(buyer.getFullName());
+                dto.setBuyerAvatar(buyer.getAvatarUrl());
             }
 
-            if (t.getSellerId() != null) {
-                userRepository.findById(t.getSellerId()).ifPresent(seller -> {
-                    dto.setSellerName(seller.getFullName());
-                    dto.setSellerAvatar(seller.getAvatarUrl());
-                });
+            User seller = t.getSeller();
+            if (seller != null) {
+                dto.setSellerName(seller.getFullName());
+                dto.setSellerAvatar(seller.getAvatarUrl());
             }
             dtoList.add(dto);
         }
@@ -100,12 +103,11 @@ public class TransactionService {
     }
 
 
-
     @Transactional
     public void acceptTransaction(Integer transactionId, String currentUserId) {
         Transaction transaction = findTransactionById(transactionId);
 
-        if (!transaction.getSellerId().equals(currentUserId)) {
+        if (!transaction.getSeller().getId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền duyệt giao dịch này!");
         }
         if (!Transaction.TransactionStatus.PENDING.equals(transaction.getStatus())) {
@@ -128,7 +130,7 @@ public class TransactionService {
     public void rejectTransaction(Integer transactionId, String currentUserId) {
         Transaction transaction = findTransactionById(transactionId);
 
-        if (!transaction.getSellerId().equals(currentUserId)) {
+        if (!transaction.getBuyer().getId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền từ chối giao dịch này!");
         }
         if (!Transaction.TransactionStatus.PENDING.equals(transaction.getStatus())) {
@@ -151,7 +153,7 @@ public class TransactionService {
     public void completeTransaction(Integer transactionId, String currentUserId) {
         Transaction transaction = findTransactionById(transactionId);
 
-        if (!transaction.getBuyerId().equals(currentUserId)) {
+        if (!transaction.getBuyer().getId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền xác nhận hoàn thành giao dịch này!");
         }
         if (!Transaction.TransactionStatus.IN_PROGRESS.equals(transaction.getStatus())) {
@@ -173,7 +175,7 @@ public class TransactionService {
     public void cancelTransaction(Integer transactionId, String currentUserId) {
         Transaction transaction = findTransactionById(transactionId);
 
-        if (!transaction.getBuyerId().equals(currentUserId) && !transaction.getSellerId().equals(currentUserId)) {
+        if (!transaction.getBuyer().getId().equals(currentUserId) && !transaction.getSeller().getId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền hủy giao dịch này!");
         }
         if (!Transaction.TransactionStatus.PENDING.equals(transaction.getStatus()) &&
