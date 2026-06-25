@@ -9,6 +9,7 @@ import vn.edu.nlu.edushare.edu_share.api.transaction.dto.request.TransactionRequ
 import vn.edu.nlu.edushare.edu_share.api.transaction.dto.response.TransactionResponseDTO;
 import vn.edu.nlu.edushare.edu_share.api.transaction.model.Transaction;
 import vn.edu.nlu.edushare.edu_share.api.transaction.repository.TransactionRepository;
+import vn.edu.nlu.edushare.edu_share.api.user.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     // Hàm helper tìm Transaction theo ID dùng chung
     private Transaction findTransactionById(Integer id) {
@@ -77,6 +79,20 @@ public class TransactionService {
             if (post != null) {
                 dto.setPostTitle(post.getTitle());
                 dto.setPostImage(post.getImageUrl());
+                dto.setPrice(post.getPrice());
+            }
+            if (t.getBuyerId() != null) {
+                userRepository.findById(t.getBuyerId()).ifPresent(buyer -> {
+                    dto.setBuyerName(buyer.getFullName());
+                    dto.setBuyerAvatar(buyer.getAvatarUrl());
+                });
+            }
+
+            if (t.getSellerId() != null) {
+                userRepository.findById(t.getSellerId()).ifPresent(seller -> {
+                    dto.setSellerName(seller.getFullName());
+                    dto.setSellerAvatar(seller.getAvatarUrl());
+                });
             }
             dtoList.add(dto);
         }
@@ -144,7 +160,6 @@ public class TransactionService {
 
         transaction.setStatus(Transaction.TransactionStatus.SUCCESS);
 
-        // Xác nhận nhận hàng thành công -> Cập nhật bài đăng sang SOLD (Đã bán)
         Post post = transaction.getPost();
         if (post != null) {
             post.setStatus(Post.Status.SOLD);
@@ -168,7 +183,6 @@ public class TransactionService {
 
         transaction.setStatus(Transaction.TransactionStatus.CANCELED);
 
-        // Hủy đơn giữa chừng -> Trả trạng thái bài đăng về AVAILABLE để người khác mua
         Post post = transaction.getPost();
         if (post != null) {
             post.setStatus(Post.Status.AVAILABLE);
