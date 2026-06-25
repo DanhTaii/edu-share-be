@@ -2,6 +2,8 @@ package vn.edu.nlu.edushare.edu_share.api.article.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,8 +26,13 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<List<PostListItemResponseDto>> getPosts() {
-        return ResponseEntity.ok(postService.getPosts());
+    public Page<PostListItemResponseDto> getPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword
+    ) {
+        return postService.getPosts(PageRequest.of(page, size), category, keyword);
     }
 
     @PostMapping
