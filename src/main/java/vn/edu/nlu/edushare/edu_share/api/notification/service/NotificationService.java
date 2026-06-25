@@ -49,12 +49,11 @@ public class NotificationService {
     /**
      * Xử lý cho tính năng TRANSACTION
      */
-    public NotificationResponseProjection sendTransactionNotification(String recipientId, String senderName, String itemName, Integer postId) {
-        // TẠO ĐỐI TƯỢNG LƯU VÀO DB
+    public NotificationResponseProjection sendTransactionNotification(String recipientId, String title, String content, Integer postId) {
         Notification dbNotification = new Notification();
         dbNotification.setUserId(recipientId);
-        dbNotification.setTitle("Yêu cầu mượn đồ");
-        dbNotification.setContent(senderName + " muốn mượn " + itemName + " của bạn.");
+        dbNotification.setTitle(title);
+        dbNotification.setContent(content);
         dbNotification.setType("TRANSACTION");
         dbNotification.setReferenceId(postId);
         // LƯU VÀO DB

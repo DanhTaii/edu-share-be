@@ -105,7 +105,7 @@ public class ChatService {
             // 5. GỬI THÔNG BÁO PUSH QUA FCM CHO NGƯỜI NHẬN KHI ĐÃ TẮT APP (WEBSOCKET ĐÃ END)
             notificationService.sendChatNotification(
                     actualRecipientId,
-                    "Tin nhắn từ " + senderName,
+                    senderName,
                     responseDto.getContent(),
                     String.valueOf(conversation.getId())
             );
@@ -187,7 +187,7 @@ public class ChatService {
 
         notificationService.sendChatNotification(
                 request.getRecipientId(), // Gửi tới người bán
-                "Tin nhắn từ " + senderName,
+                senderName,
                 request.getContent(),
                 String.valueOf(conversation.getId())
         );

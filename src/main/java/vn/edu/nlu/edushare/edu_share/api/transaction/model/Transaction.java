@@ -43,7 +43,7 @@ public class Transaction {
 
     // Trạng thái của giao dịch (PENDING, IN_PROGRESS, SUCCESS,...) lưu dạng String trong DB
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 20)
     private TransactionStatus status; //
 
     // Tự động sinh thời gian khi tạo bản ghi mới (Cột created_at timestamp)
