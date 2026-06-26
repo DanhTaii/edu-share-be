@@ -31,9 +31,11 @@ public class PostController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String transactionType
     ) {
-        return postService.getPosts(PageRequest.of(page, size), category, keyword);
+        return postService.getPosts(PageRequest.of(page, size), category, keyword, status, transactionType);
     }
 
     @GetMapping("/me")

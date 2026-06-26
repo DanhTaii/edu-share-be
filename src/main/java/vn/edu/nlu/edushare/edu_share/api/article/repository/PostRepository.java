@@ -43,6 +43,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
         LEFT JOIN locations l ON l.id = p.location_id
         LEFT JOIN users u ON u.id = p.author_id
         WHERE (p.status IS NULL OR p.status <> 'HIDDEN')
+          AND (:status IS NULL OR p.status = :status)
+          AND (:transactionType IS NULL OR p.transaction_type = :transactionType)
           AND (:category IS NULL OR c.name = :category)
           AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                OR LOWER(COALESCE(p.description, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))
@@ -53,6 +55,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
         FROM posts p
         LEFT JOIN categories c ON c.id = p.category_id
         WHERE (p.status IS NULL OR p.status <> 'HIDDEN')
+          AND (:status IS NULL OR p.status = :status)
+          AND (:transactionType IS NULL OR p.transaction_type = :transactionType)
           AND (:category IS NULL OR c.name = :category)
           AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
                OR LOWER(COALESCE(p.description, '')) LIKE LOWER(CONCAT('%', :keyword, '%')))
@@ -61,6 +65,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<PostListItemProjection> findVisiblePostList(
             @Param("category") String category,
             @Param("keyword") String keyword,
+            @Param("status") String status,
+            @Param("transactionType") String transactionType,
             Pageable pageable
     );
 

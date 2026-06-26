@@ -32,10 +32,12 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
 
-    public Page<PostListItemResponseDto> getPosts(Pageable pageable, String category, String keyword) {
+    public Page<PostListItemResponseDto> getPosts(Pageable pageable, String category, String keyword, String status, String transactionType) {
         String categoryFilter = normalizeFilter(category);
-        String keywordFilter = normalizeFilter(keyword);
-        return postRepository.findVisiblePostList(categoryFilter, keywordFilter, pageable)
+        String keywordFilter = toNullableFilter(keyword);
+        String statusFilter = normalizeEnumFilter(status);
+        String transactionTypeFilter = normalizeEnumFilter(transactionType);
+        return postRepository.findVisiblePostList(categoryFilter, keywordFilter, statusFilter, transactionTypeFilter, pageable)
                 .map(this::toPostListItemResponseDto);
     }
 
@@ -279,6 +281,15 @@ public class PostService {
             return null;
         }
         return normalized;
+    }
+    private String toNullableFilter(String value) {
+        String normalized = normalize(value);
+        return StringUtils.hasText(normalized) ? normalized : null;
+    }
+
+    private String normalizeEnumFilter(String value) {
+        String normalized = normalize(value);
+        return StringUtils.hasText(normalized) ? normalized.toUpperCase(Locale.ROOT) : null;
     }
     private String blankToNull(String value) {
         String normalized = normalize(value);
