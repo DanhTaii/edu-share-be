@@ -87,6 +87,22 @@ public class PostController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(
+            @PathVariable Integer postId,
+            Authentication authentication
+    ) {
+        try {
+            String currentUserId = (String) authentication.getCredentials();
+            postService.deletePost(postId, currentUserId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     @GetMapping("/{postId}/summary")
     public ResponseEntity<PostSummaryResponseDto> getPostSummaryById(
             @PathVariable Integer postId
