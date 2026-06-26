@@ -98,6 +98,34 @@ public class PostService {
     }
     //
     // Thêm vào cuối class, trước dấu }
+    @Transactional
+    public PostListItemResponseDto updatePost(Integer postId, CreatePostRequestDto request, String currentUserId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        if (post.getAuthor() == null || !currentUserId.equals(post.getAuthor().getId())) {
+            throw new IllegalStateException("You can only edit your own post");
+        }
+
+        Category category = resolveCategory(request);
+        LocationDemo location = resolveLocation(request.getLocationId());
+        Post.TransactionType transactionType = resolveTransactionType(request);
+        Double price = resolvePrice(request.getPrice(), transactionType);
+
+        post.setCategoryId(category.getId());
+        post.setLocationId(location.getId());
+        post.setTitle(request.getTitle().trim());
+        post.setDescription(resolveDescription(request));
+        post.setPrice(price);
+        post.setImageUrl(blankToNull(request.getImageUrl()));
+        post.setTransactionType(transactionType);
+
+        Post saved = postRepository.save(post);
+        saved.setCategory(category);
+        saved.setLocation(location);
+
+        return toPostListItem(saved);
+    }
     public List<PostMapResponseDto> getPostsForMap(String area, String keyword) {
         String areaParam = (area != null && !area.isBlank()) ? area : null;
         String keywordParam = (keyword != null && !keyword.isBlank()) ? keyword : null;

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -70,6 +71,22 @@ public class PostController {
         }
     }
 
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<?> updatePost(
+            @PathVariable Integer postId,
+            @Valid @RequestBody CreatePostRequestDto request,
+            Authentication authentication
+    ) {
+        try {
+            String currentUserId = (String) authentication.getCredentials();
+            return ResponseEntity.ok(postService.updatePost(postId, request, currentUserId));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     @GetMapping("/{postId}/summary")
     public ResponseEntity<PostSummaryResponseDto> getPostSummaryById(
             @PathVariable Integer postId
