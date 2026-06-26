@@ -96,8 +96,6 @@ public class PostService {
 
         return toPostListItem(saved);
     }
-    //
-    // Thêm vào cuối class, trước dấu }
     @Transactional
     public PostListItemResponseDto updatePost(Integer postId, CreatePostRequestDto request, String currentUserId) {
         Post post = postRepository.findById(postId)
@@ -125,6 +123,19 @@ public class PostService {
         saved.setLocation(location);
 
         return toPostListItem(saved);
+    }
+
+    @Transactional
+    public void deletePost(Integer postId, String currentUserId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        if (post.getAuthor() == null || !currentUserId.equals(post.getAuthor().getId())) {
+            throw new IllegalStateException("You can only delete your own post");
+        }
+
+        post.setStatus(Post.Status.HIDDEN);
+        postRepository.save(post);
     }
     public List<PostMapResponseDto> getPostsForMap(String area, String keyword) {
         String areaParam = (area != null && !area.isBlank()) ? area : null;
