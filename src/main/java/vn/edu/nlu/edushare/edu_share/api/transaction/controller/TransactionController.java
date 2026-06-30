@@ -35,6 +35,7 @@ public class TransactionController {
             Transaction result = transactionService.createTransactionRequest(requestDTO, currentUserId);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
