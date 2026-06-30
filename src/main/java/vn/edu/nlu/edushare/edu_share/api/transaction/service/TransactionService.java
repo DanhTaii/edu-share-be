@@ -148,7 +148,7 @@ public class TransactionService {
     public void rejectTransaction(Integer transactionId, String currentUserId) {
         Transaction transaction = findTransactionById(transactionId);
 
-        if (!transaction.getBuyer().getId().equals(currentUserId)) {
+        if (!transaction.getSeller().getId().equals(currentUserId)) {
             throw new RuntimeException("Bạn không có quyền từ chối giao dịch này!");
         }
         if (!Transaction.TransactionStatus.PENDING.equals(transaction.getStatus())) {
